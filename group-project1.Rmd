@@ -9,24 +9,30 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+
+
 ```{r}
 library(dplyr)
 library(tidyr)
-```
-
-
-```{r}
-train <- read.csv("train.csv", sep = ",")
-test <- read.csv("test.csv", sep = ",")
-head(train)
-```
-
-```{r}
 library(ggplot2)
 library(rgdal)
 library(sp)
-
 library(maptools)
+library("rgdal")
+library("lattice")
+library(geosphere)
+```
+
+
+```{r}
+#train <- read.csv("train.csv", sep = ",")
+test <- read.csv("data/test.csv", sep = ",")
+#head(train)
+```
+
+```{r}
+
 
 
 shpurl <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
@@ -55,10 +61,7 @@ cord.UTM
 cord <- data.frame(cord.UTM@coords, id="A", stringsAsFactors=F)
 
 cord2 <- cord
-library(maptools)
-library("rgdal")
-library("lattice")
-library(geosphere)
+
 shpurl <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
 tmp    <- tempfile(fileext=".zip")
 download.file(shpurl, destfile=tmp)
