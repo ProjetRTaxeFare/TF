@@ -76,7 +76,7 @@ cord@coords
 
 ### SpatialGrid object
 bb <- bbox(shp)
-cellsize <- c(3.28084, 3.28084)*1000  # cell size 1000m
+cellsize <- c(3.28084, 3.28084)*200  # cell size 1000m
                                 # 1 ft = 3.28084 m
 cc <- bb[, 1] + (cellsize/2)  # cell offset
 cd <- ceiling(diff(t(bb))/cellsize)  # number of cells per direction
@@ -90,15 +90,17 @@ spplot(spatial_grid, "id",
        panel = function(...) {
          panel.gridplot(..., border="black")
          sp.polygons(shp)
-         panel.text(...)
+         
        })
 over(cord, spatial_grid)
+summary(over(cord, spatial_grid))
 
 
-plot(shp)
+
 
 
 # Plot coordinates
+plot(shp)
 points(cord2$coords.x1, cord2$coords.x2, pch=19, col="red")
 ```
 
@@ -224,6 +226,7 @@ temps_trajet_case <- function(dfinit,dfres, grid){
 }
   
 ```
+
 
 ```{r}
 
