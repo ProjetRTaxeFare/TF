@@ -1,0 +1,26 @@
+
+
+Projet R
+
+
+Petite aide pour se configurer le Git du projet R
+
+Se créer un compte Git (doit être indépendant du thinkR, donc aller sur github et le faire comme un exté)
+donner son pseudo Git à Gautier pour qu’il te rajoute au projet
+se connecter au Git du projet avec le lien suivant :https://github.com/ProjetRTaxeFare/TF/
+dans l’onglet “code” se créer une branche à soi
+créer un projet sur RStudio qui va dépendre du Git (3eme option au début (New directory, existing directory, prendre le dernier) ) 
+faire les modifications qu’on veut
+On peut voir les modifs sur l’onglet en haut à gauche sur Rstudio (onglet Git) - les changements non commités sont en bleu.
+Faire des commits sur sa branche lorsqu’on a qqch de cohérent
+Enfin, faire des pull/push quand on veut aller sur la branche master
+Valider ces pull/push sur internet (toujours le même lien) en faisant un pull request sur votre branche et en la validant sur Git
+delete la branche utilisée jusque là, en commencer une nouvelle pour une nouvelle fonctionnalité !
+
+
+TODO :
+faire une fonction “représentation” du code au début pour pas que ça soit dans l’environnement & pour le shinyapp
+shinyapp final : carte avec point de départ, point d’arrivée, qui donnera trajet & prix
+
+lien ggdoc :
+https://docs.google.com/document/d/14RltK-wbFdifR26zlMLGvVDLclMY0hED3MrDy5UcKxg/edit
