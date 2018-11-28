@@ -31,10 +31,12 @@ largeur_cellule <- 200
 
 ```{r}
 #train <- read.csv("train.csv", sep = ",")
+#test <- read.csv("data/test.csv", sep = ",")
+#head(train)
+test=train_000
 test <- read.csv("train-000.csv", sep = ",")
 #head(train)
 summary(test)
-
 cleaning <- function(train) {
   train_df <- train %>% filter(fare_amount >=0) %>% filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20, pickup_latitude < 60, dropoff_longitude > -100, dropoff_longitude < -50, dropoff_latitude > 20, dropoff_latitude < 60)
   return(train_df)
@@ -87,7 +89,9 @@ cord@coords
 
 ### SpatialGrid object
 bb <- bbox(shp)
+
 cellsize <- c(3.28084, 3.28084)*largeur_cellule  # cell size 1000m
+
                                 # 1 ft = 3.28084 m
 cc <- bb[, 1] + (cellsize/2)  # cell offset
 cd <- ceiling(diff(t(bb))/cellsize)  # number of cells per direction
@@ -103,19 +107,23 @@ spplot(spatial_grid, "id",
          sp.polygons(shp)
          #panel.text(...)
 
+
        })
 over(cord, spatial_grid)
+summary(over(cord, spatial_grid))
 
 
-plot(shp)
+
 
 
 # Plot coordinates
+plot(shp)
 points(cord2$coords.x1, cord2$coords.x2, pch=19, col="red")
 ```
 
 ```{r}
 # Permet de calculer l'idea pour chaque point 
+
 over_2 <- function (long, lat, grid) {
   cord.dec = SpatialPoints(cbind(long, lat), proj4string = CRS("+proj=longlat"))
   cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
@@ -131,12 +139,17 @@ over_2 <- function (long, lat, grid) {
 ```
 
 
-
 ```{r}
+
 
 #VERSION 2 - En utilisant la sortie de la fonction de VIGGIANO suivante :
 
+
 transformation <- function (list,grid){
+  
+  #We want to clean the data in order to use it efficiently late. 
+  
+  #Calling the variables
   key <- as.character(list[3])
   price <- as.numeric(list[2])
   long1 <- as.numeric(list[4])
@@ -145,10 +158,13 @@ transformation <- function (list,grid){
   lat2 <- as.numeric(list[7])
   passenger <- as.numeric(list[8])
   
- 
+
+  #Retrieving the day and the hour
   day <- as.numeric(substr(key,9,10))
   hour <- as.numeric(substr(key,12,13))
   
+  
+  #Transforming the coords in UTM
   cord.dec_1 = SpatialPoints(cbind(long1, lat1), proj4string = CRS("+proj=longlat"))
   cord.UTM_1 <- spTransform(cord.dec_1, CRS(proj4string(shp)))
   cord_1 <- data.frame(cord.UTM_1@coords, stringsAsFactors=F)
@@ -163,12 +179,15 @@ transformation <- function (list,grid){
   coordinates(cord_2_a) <- ~ long2 + lat2
   proj4string(cord_2_a) <- proj4string(shp)
   
+  
+  #Getting the id of the different squares
   idp <- over(cord_1_a,grid)
   idd <- over(cord_2_a,grid)
   
   
-  
-  return(c(#cord_1[1],cord_1[2],cord_2[1],cord_2[2], #si on veut aussi les UTM
+ 
+  return(c(#cord_1[1],cord_1[2],cord_2[1],cord_2[2], #if we also want the UTM coords
+
     
     long1,lat1,long2,lat2,
     
@@ -177,6 +196,11 @@ transformation <- function (list,grid){
   
   
 }
+
+```
+
+```{r}
+
 
 #Fonction qui donne le dataset final mais que pour un trajet initial (de A à B) 
 path <- function(pretty_row) {
@@ -210,10 +234,27 @@ path <- function(pretty_row) {
     summarise(nb = n(), Prix = sum(Prix)) %>% 
     ungroup()  
 
+
   return(final_df)
 }
 
 
+good_dataframe<-function(df,grid){
+  #il reste encore un ou deux bugs
+  #creates a whole dataframe with clean data
+  
+  map_df(df,~transformation(.x),grid)
+  
+  
+}
+
+good_dataframe(test,spatial_grid)
+  
+  
+  
+
+
 ```
+
 
 
