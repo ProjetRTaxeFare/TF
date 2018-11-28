@@ -102,6 +102,7 @@ spplot(spatial_grid, "id",
          panel.gridplot(..., border="black")
          sp.polygons(shp)
          #panel.text(...)
+
        })
 over(cord, spatial_grid)
 
