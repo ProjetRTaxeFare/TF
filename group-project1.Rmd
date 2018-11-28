@@ -89,7 +89,7 @@ spatial_grid <- SpatialGridDataFrame(grd,
 spplot(spatial_grid, "id",
        panel = function(...) {
          panel.gridplot(..., border="black")
-         sp.polygons(shp)
+         sp.polygons(shp) 
          panel.text(...)
        })
 over(cord, spatial_grid)
