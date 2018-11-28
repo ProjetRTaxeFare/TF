@@ -1,0 +1,226 @@
+---
+title: "group_project1"
+author: "Annabelle Frin"
+date: "17/11/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+```
+
+
+```{r}
+train <- read.csv("train.csv", sep = ",")
+test <- read.csv("test.csv", sep = ",")
+head(train)
+```
+
+```{r}
+library(ggplot2)
+library(rgdal)
+library(sp)
+
+library(maptools)
+
+
+shpurl <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
+
+tmp    <- tempfile(fileext=".zip")
+download.file(shpurl, destfile=tmp)
+files <- unzip(tmp, exdir=getwd())
+
+
+
+# Load & plot shapefile
+shp <- readShapePoly(files[grep(".shp$", files)])
+
+# Load & plot shapefile
+shp <- readShapePoly(files[grep(".shp$", files)])
+### read shapefile
+shp <- readOGR("nybb_13a", "nybb")
+proj4string(shp) 
+
+cord.dec = SpatialPoints(cbind(test$pickup_longitude, test$pickup_latitude), proj4string = CRS("+proj=longlat"))
+
+
+cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
+cord.UTM
+
+cord <- data.frame(cord.UTM@coords, id="A", stringsAsFactors=F)
+
+cord2 <- cord
+library(maptools)
+library("rgdal")
+library("lattice")
+library(geosphere)
+shpurl <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
+tmp    <- tempfile(fileext=".zip")
+download.file(shpurl, destfile=tmp)
+files <- unzip(tmp, exdir=getwd())
+
+
+
+coordinates(cord) <- ~ coords.x1 + coords.x2
+proj4string(cord) <- proj4string(shp)
+
+cord@coords
+
+### SpatialGrid object
+bb <- bbox(shp)
+cellsize <- c(3.28084, 3.28084)*1000  # cell size 1000m
+                                # 1 ft = 3.28084 m
+cc <- bb[, 1] + (cellsize/2)  # cell offset
+cd <- ceiling(diff(t(bb))/cellsize)  # number of cells per direction
+grd <- GridTopology(cellcentre.offset=cc, cellsize=cellsize, cells.dim=cd)
+
+spatial_grid <- SpatialGridDataFrame(grd,
+                               data=data.frame(id=1:prod(cd)),
+                               proj4string=CRS(proj4string(shp)))   
+
+spplot(spatial_grid, "id",
+       panel = function(...) {
+         panel.gridplot(..., border="black")
+         sp.polygons(shp)
+         panel.text(...)
+       })
+over(cord, spatial_grid)
+
+
+plot(shp)
+
+
+# Plot coordinates
+points(cord2$coords.x1, cord2$coords.x2, pch=19, col="red")
+```
+
+```{r}
+over_pickup <- function (test) {
+  # shpurl <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
+  # tmp    <- tempfile(fileext=".zip")
+  # download.file(shpurl, destfile=tmp)
+  # files <- unzip(tmp, exdir=getwd())
+  
+  # shp <- readShapePoly(files[grep(".shp$", files)])
+  # shp <- readOGR("nybb_13a", "nybb")
+  proj4string(shp) 
+  cord.dec = SpatialPoints(cbind(test$pickup_longitude, test$pickup_latitude), proj4string = CRS("+proj=longlat"))
+  cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
+  cord <- data.frame(cord.UTM@coords, id="A", stringsAsFactors=F)
+  cord2 <- cord
+  coordinates(cord) <- ~ coords.x1 + coords.x2
+  proj4string(cord) <- proj4string(shp)
+  bb <- bbox(shp)
+  cellsize <- c(3.28084, 3.28084)*1000  
+  cc <- bb[, 1] + (cellsize/2)  
+  cd <- ceiling(diff(t(bb))/cellsize)  
+  grd <- GridTopology(cellcentre.offset=cc, cellsize=cellsize, cells.dim=cd)
+  spatial_grid <- SpatialGridDataFrame(grd,
+                               data=data.frame(id=1:prod(cd)),
+                               proj4string=CRS(proj4string(shp)))   
+
+  return(over(cord, spatial_grid))
+}
+
+over_dropoff <- function (test) {
+  # shpurl <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
+  # tmp    <- tempfile(fileext=".zip")
+  # download.file(shpurl, destfile=tmp)
+  # files <- unzip(tmp, exdir=getwd())
+  # 
+  # shp <- readShapePoly(files[grep(".shp$", files)])
+  # shp <- readOGR("nybb_13a", "nybb")
+  proj4string(shp) 
+  cord.dec = SpatialPoints(cbind(test$dropoff_longitude, test$dropoff_latitude), proj4string = CRS("+proj=longlat"))
+  cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
+  cord <- data.frame(cord.UTM@coords, id="A", stringsAsFactors=F)
+  cord2 <- cord
+  coordinates(cord) <- ~ coords.x1 + coords.x2
+  proj4string(cord) <- proj4string(shp)
+  bb <- bbox(shp)
+  cellsize <- c(3.28084, 3.28084)*1000  
+  cc <- bb[, 1] + (cellsize/2)  
+  cd <- ceiling(diff(t(bb))/cellsize)  
+  grd <- GridTopology(cellcentre.offset=cc, cellsize=cellsize, cells.dim=cd)
+  spatial_grid <- SpatialGridDataFrame(grd,
+                               data=data.frame(id=1:prod(cd)),
+                               proj4string=CRS(proj4string(shp)))   
+
+  return(over(cord, spatial_grid))
+}
+
+
+over_2 <- function (long, lat, grid) {
+  cord.dec = SpatialPoints(cbind(long, lat), proj4string = CRS("+proj=longlat"))
+  cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
+  cord <- data.frame(cord.UTM@coords, id="A", stringsAsFactors=F)
+  cord2 <- cord
+  coordinates(cord) <- ~ long + lat
+  proj4string(cord) <- proj4string(shp)
+
+  return(over(cord,grid))
+}
+
+
+```
+
+
+
+```{r}
+#Test pour voir ce que renvoie over pour un point
+over_2(-73.97332,40.76381,spatial_grid)
+
+#Fonction qui donne le dataset final mais que pour un trajet initial (de A à B)
+path <- function(coordA, coordB, grid, dftemp, dfres, t_parcours) {
+  #on calcule le pas, nb d'iterations, etc
+  distance <- distm(coordA,coordB)
+  niteration = distance * 10
+  pas = 1/niteration
+  pas_vectoriel <- as.vector((coordB-coordA)*pas)
+  coord <- coordA
+  n <- 0
+  #début de la boucle qui permet de savoir quelles cases ont été parcourues par le trajet. On construit ainsi une nouvelle dataset dftemp
+  for (i in 1:(niteration+1)) {
+    case <- over_2(coord[1],coord[2],grid)
+    if (!(case %in% res)) {
+      rbind(dftemp, c(case, t_parcours )) # j'ai que trouvé ça pour avoir une dataframe où on aura les cases d'un coté et les temps de parcours de l'autre pour chaque trajet mais sans faire un truc énorme et vide
+    }
+    coord <- coord + pas_vectoriel
+  }
+  #On transforme dftemp pour avoir le temps de parcours par case
+  dftemp <- dftemp %>% 
+    group_by(case) %>% 
+    summarise(nb = n()) %>% 
+    ungroup() %>% 
+    mutate(t_case = t_parcours/nb)
+  #On obtient le résultat final
+  dfres <- dftemp %>% 
+    select(case, t_case)
+  return(dfres)
+}
+
+dftemp <- data.frame( case = integer(),
+                      indice = integer(),
+                      time = double)
+
+mapping <- data.frame( Case = integer(),
+                       t_case = double())
+
+#fonction qui nous donnera la dataframe dans le format qu'on veut (dfres) à partir de la dataframe initiale(dfinit, c'est train et test quoi)
+temps_trajet_case <- function(dfinit,dfres, grid){
+  df <- dfinit %>% 
+    select(pickup_longitude, pickup_latitude, dropoff_longitude, dropoff_latitude, trip_duration) %>%  #C'est ici qu'il faudra rajouter pickup_datetime quand on fera les plages horaires (si on les fait)
+    mutate(coordA = c(pickup_longitude, pickup_latitude)) %>% 
+    mutate(coordB = c(dropoff_longitude, dropoff_latitude)) %>% 
+    mutate(path = path(coordA, coordB, grid, dftemp, dfres, trip_duration)) #Bon je sais pas si c'est de cette forme mais ça buggue - l'idé c'est d'appliquer path à chaque ligne de la dataframe
+}
+  
+```
+
+
+
