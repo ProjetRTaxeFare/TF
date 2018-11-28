@@ -15,6 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(dplyr)
 library(tidyr)
+library(purrr)
 library(ggplot2)
 library(rgdal)
 library(sp)
@@ -22,13 +23,23 @@ library(maptools)
 library("rgdal")
 library("lattice")
 library(geosphere)
+
+largeur_cellule <- 200
+
 ```
 
 
 ```{r}
 #train <- read.csv("train.csv", sep = ",")
-test <- read.csv("data/test.csv", sep = ",")
+test <- read.csv("train-000.csv", sep = ",")
 #head(train)
+summary(test)
+
+cleaning <- function(train) {
+  train_df <- train %>% filter(fare_amount >=0) %>% filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20, pickup_latitude < 60, dropoff_longitude > -100, dropoff_longitude < -50, dropoff_latitude > 20, dropoff_latitude < 60)
+  return(train_df)
+}
+test <- cleaning(test)
 ```
 
 ```{r}
@@ -76,7 +87,7 @@ cord@coords
 
 ### SpatialGrid object
 bb <- bbox(shp)
-cellsize <- c(3.28084, 3.28084)*1000  # cell size 1000m
+cellsize <- c(3.28084, 3.28084)*largeur_cellule  # cell size 1000m
                                 # 1 ft = 3.28084 m
 cc <- bb[, 1] + (cellsize/2)  # cell offset
 cd <- ceiling(diff(t(bb))/cellsize)  # number of cells per direction
@@ -90,7 +101,7 @@ spplot(spatial_grid, "id",
        panel = function(...) {
          panel.gridplot(..., border="black")
          sp.polygons(shp)
-         panel.text(...)
+         #panel.text(...)
        })
 over(cord, spatial_grid)
 
@@ -103,61 +114,7 @@ points(cord2$coords.x1, cord2$coords.x2, pch=19, col="red")
 ```
 
 ```{r}
-over_pickup <- function (test) {
-  # shpurl <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
-  # tmp    <- tempfile(fileext=".zip")
-  # download.file(shpurl, destfile=tmp)
-  # files <- unzip(tmp, exdir=getwd())
-  
-  # shp <- readShapePoly(files[grep(".shp$", files)])
-  # shp <- readOGR("nybb_13a", "nybb")
-  proj4string(shp) 
-  cord.dec = SpatialPoints(cbind(test$pickup_longitude, test$pickup_latitude), proj4string = CRS("+proj=longlat"))
-  cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
-  cord <- data.frame(cord.UTM@coords, id="A", stringsAsFactors=F)
-  cord2 <- cord
-  coordinates(cord) <- ~ coords.x1 + coords.x2
-  proj4string(cord) <- proj4string(shp)
-  bb <- bbox(shp)
-  cellsize <- c(3.28084, 3.28084)*1000  
-  cc <- bb[, 1] + (cellsize/2)  
-  cd <- ceiling(diff(t(bb))/cellsize)  
-  grd <- GridTopology(cellcentre.offset=cc, cellsize=cellsize, cells.dim=cd)
-  spatial_grid <- SpatialGridDataFrame(grd,
-                               data=data.frame(id=1:prod(cd)),
-                               proj4string=CRS(proj4string(shp)))   
-
-  return(over(cord, spatial_grid))
-}
-
-over_dropoff <- function (test) {
-  # shpurl <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
-  # tmp    <- tempfile(fileext=".zip")
-  # download.file(shpurl, destfile=tmp)
-  # files <- unzip(tmp, exdir=getwd())
-  # 
-  # shp <- readShapePoly(files[grep(".shp$", files)])
-  # shp <- readOGR("nybb_13a", "nybb")
-  proj4string(shp) 
-  cord.dec = SpatialPoints(cbind(test$dropoff_longitude, test$dropoff_latitude), proj4string = CRS("+proj=longlat"))
-  cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
-  cord <- data.frame(cord.UTM@coords, id="A", stringsAsFactors=F)
-  cord2 <- cord
-  coordinates(cord) <- ~ coords.x1 + coords.x2
-  proj4string(cord) <- proj4string(shp)
-  bb <- bbox(shp)
-  cellsize <- c(3.28084, 3.28084)*1000  
-  cc <- bb[, 1] + (cellsize/2)  
-  cd <- ceiling(diff(t(bb))/cellsize)  
-  grd <- GridTopology(cellcentre.offset=cc, cellsize=cellsize, cells.dim=cd)
-  spatial_grid <- SpatialGridDataFrame(grd,
-                               data=data.frame(id=1:prod(cd)),
-                               proj4string=CRS(proj4string(shp)))   
-
-  return(over(cord, spatial_grid))
-}
-
-
+# Permet de calculer l'idea pour chaque point 
 over_2 <- function (long, lat, grid) {
   cord.dec = SpatialPoints(cbind(long, lat), proj4string = CRS("+proj=longlat"))
   cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
@@ -175,58 +132,85 @@ over_2 <- function (long, lat, grid) {
 
 
 ```{r}
-#Test pour voir ce que renvoie over pour un point
-over_2(-73.97332,40.76381,spatial_grid)
 
-#Fonction qui donne le dataset final mais que pour un trajet initial (de A à B)
-path <- function(coordA, coordB, grid, dftemp, dfres, t_parcours) {
-  #on calcule le pas, nb d'iterations, etc
+#VERSION 2 - En utilisant la sortie de la fonction de VIGGIANO suivante :
+
+transformation <- function (list,grid){
+  key <- as.character(list[3])
+  price <- as.numeric(list[2])
+  long1 <- as.numeric(list[4])
+  lat1 <- as.numeric(list[5])
+  long2 <-as.numeric( list[6])
+  lat2 <- as.numeric(list[7])
+  passenger <- as.numeric(list[8])
+  
+ 
+  day <- as.numeric(substr(key,9,10))
+  hour <- as.numeric(substr(key,12,13))
+  
+  cord.dec_1 = SpatialPoints(cbind(long1, lat1), proj4string = CRS("+proj=longlat"))
+  cord.UTM_1 <- spTransform(cord.dec_1, CRS(proj4string(shp)))
+  cord_1 <- data.frame(cord.UTM_1@coords, stringsAsFactors=F)
+  cord_1_a <- data.frame(cord.UTM_1@coords, id="A", stringsAsFactors=F)
+  coordinates(cord_1_a) <- ~ long1 + lat1
+  proj4string(cord_1_a) <- proj4string(shp)
+  
+  cord.dec_2 = SpatialPoints(cbind(long2, lat2), proj4string = CRS("+proj=longlat"))
+  cord.UTM_2 <- spTransform(cord.dec_2, CRS(proj4string(shp)))
+  cord_2 <- data.frame(cord.UTM_2@coords, stringsAsFactors=F)
+  cord_2_a <- data.frame(cord.UTM_2@coords, id="A", stringsAsFactors=F)
+  coordinates(cord_2_a) <- ~ long2 + lat2
+  proj4string(cord_2_a) <- proj4string(shp)
+  
+  idp <- over(cord_1_a,grid)
+  idd <- over(cord_2_a,grid)
+  
+  
+  
+  return(c(#cord_1[1],cord_1[2],cord_2[1],cord_2[2], #si on veut aussi les UTM
+    
+    long1,lat1,long2,lat2,
+    
+    idp,idd,day,hour,price,passenger))
+  
+  
+  
+}
+
+#Fonction qui donne le dataset final mais que pour un trajet initial (de A à B) 
+path <- function(pretty_row) {
+  pretty_row <- test_row
+  coordA <- c(pretty_row[[1]],pretty_row[[2]])
+  coordB <- c(pretty_row[[3]],pretty_row[[4]])
+  IDA <- pretty_row[[5]]
+  IDB <- pretty_row[[6]]
+  jour <- pretty_row[[7]]
+  heure <- pretty_row[[8]]
+  prix_parcours <- pretty_row[[9]]
+  passagers <- pretty_row[[10]]
+  
+  #on calcule le pas vectoriel et le nb d'itération :
   distance <- distm(coordA,coordB)
-  niteration = distance * 10
+  niteration = as.integer(distance / (largeur_cellule/5))
   pas = 1/niteration
   pas_vectoriel <- as.vector((coordB-coordA)*pas)
-  coord <- coordA
-  n <- 0
-  #début de la boucle qui permet de savoir quelles cases ont été parcourues par le trajet. On construit ainsi une nouvelle dataset dftemp
-  for (i in 1:(niteration+1)) {
-    case <- over_2(coord[1],coord[2],grid)
-    if (!(case %in% res)) {
-      rbind(dftemp, c(case, t_parcours )) # j'ai que trouvé ça pour avoir une dataframe où on aura les cases d'un coté et les temps de parcours de l'autre pour chaque trajet mais sans faire un truc énorme et vide
-    }
-    coord <- coord + pas_vectoriel
-  }
-  #On transforme dftemp pour avoir le temps de parcours par case
-  dftemp <- dftemp %>% 
-    group_by(case) %>% 
-    summarise(nb = n()) %>% 
-    ungroup() %>% 
-    mutate(t_case = t_parcours/nb)
-  #On obtient le résultat final
-  dfres <- dftemp %>% 
-    select(case, t_case)
-  return(dfres)
-}
-
-dftemp <- data.frame( case = integer(),
-                      indice = integer(),
-                      time = double)
-
-mapping <- data.frame( Case = integer(),
-                       t_case = double())
-
-#fonction qui nous donnera la dataframe dans le format qu'on veut (dfres) à partir de la dataframe initiale(dfinit, c'est train et test quoi)
-temps_trajet_case <- function(dfinit,dfres, grid){
-  df <- dfinit %>% 
-    select(pickup_longitude, pickup_latitude, dropoff_longitude, dropoff_latitude, trip_duration) %>%  #C'est ici qu'il faudra rajouter pickup_datetime quand on fera les plages horaires (si on les fait)
-    mutate(coordA = c(pickup_longitude, pickup_latitude)) %>% 
-    mutate(coordB = c(dropoff_longitude, dropoff_latitude)) %>% 
-    mutate(path = path(coordA, coordB, grid, dftemp, dfres, trip_duration)) #Bon je sais pas si c'est de cette forme mais ça buggue - l'idé c'est d'appliquer path à chaque ligne de la dataframe
-}
   
-```
+  infos <- 1:niteration
+  etapes_coords <- map(infos, ~ coordA + pas_vectoriel*.x)
+  etapes_Ids <- map(etapes_coords, ~ over_2(.x[[1]],.x[[2]],spatial_grid)[[1,1]])
+  
+  etapes_df <- do.call(rbind.data.frame, etapes_Ids)
+  names(etapes_df)[1] <- "IDs"
+  
+  final_df <- etapes_df %>% mutate("Prix" = prix_parcours/niteration, "Passagers" = passagers, "Jour" = jour, "Heure" = heure)
+  
+  final_df <- final_df %>% 
+    group_by(IDs, Passagers, Jour, Heure) %>% 
+    summarise(nb = n(), Prix = sum(Prix)) %>% 
+    ungroup()  
 
-```{r}
-
+  return(final_df)
+}
 
 
 ```
