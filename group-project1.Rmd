@@ -238,7 +238,7 @@ path(test[10,])
 ```
 
 ```{r}
-#train_test <- train[1:1000,]
+train_test <- train[1:100000,]
 
 good_dataframe<-function(df,grid){
   #creates a whole dataframe with clean data
@@ -247,7 +247,7 @@ good_dataframe<-function(df,grid){
   
   }
 
-#test <- good_dataframe(train_test,spatial_grid)
+test <- good_dataframe(train_test,spatial_grid)
 #summary(test)
 discretisation_dataframe <- function(good_df) {
 
@@ -255,10 +255,14 @@ discretisation_dataframe <- function(good_df) {
   
   }
 
-#test_2 <- discretisation_dataframe(test)
+test_2 <- discretisation_dataframe(test)
 
-#test_2_gpby <- test_2 %>% group_by(IDs, Passagers, Jour, Heure) %>% summarise(nb = sum(nb), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
+test_2_gpby <- test_2 %>% group_by(IDs, Passagers, Jour, Heure) %>% summarise(nb = sum(nb), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
 
+total_test <- discretisation_dataframe(good_dataframe(train,spatial_grid)) %>% group_by(IDs, Passagers, Jour, Heure) %>% summarise(nb = sum(nb), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
+
+
+write.csv(total_test, file = "model_result_with_200000_data.csv")
 ```
 
 
