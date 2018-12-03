@@ -24,24 +24,21 @@ library("rgdal")
 library("lattice")
 library(geosphere)
 
-largeur_cellule <- 200
-
 ```
 
 
 ```{r}
-#train <- read.csv("train.csv", sep = ",")
+largeur_cellule <- 200
+
+train <- read.csv("train-000.csv", sep = ",")
 #test <- read.csv("data/test.csv", sep = ",")
 #head(train)
-test=train_000
-#test <- read.csv("train-000.csv", sep = ",")
-#head(train)
-summary(test)
 cleaning <- function(train) {
   train_df <- train %>% filter(fare_amount >=0) %>% filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20, pickup_latitude < 60, dropoff_longitude > -100, dropoff_longitude < -50, dropoff_latitude > 20, dropoff_latitude < 60)
   return(train_df)
 }
-test <- cleaning(test)
+train <- cleaning(train)
+
 ```
 
 ```{r}
@@ -65,7 +62,7 @@ shp <- readShapePoly(files[grep(".shp$", files)])
 shp <- readOGR("nybb_13a", "nybb")
 proj4string(shp) 
 
-cord.dec = SpatialPoints(cbind(test$pickup_longitude, test$pickup_latitude), proj4string = CRS("+proj=longlat"))
+cord.dec = SpatialPoints(cbind(train$pickup_longitude, train$pickup_latitude), proj4string = CRS("+proj=longlat"))
 
 
 cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
@@ -135,7 +132,6 @@ over_2 <- function (long, lat, grid) {
   return(over(cord,grid))
 }
 
-
 ```
 
 
@@ -143,7 +139,6 @@ over_2 <- function (long, lat, grid) {
 
 
 #VERSION 2 - En utilisant la sortie de la fonction de VIGGIANO suivante :
-
 
 transformation <- function (list,grid){
   
@@ -171,54 +166,52 @@ transformation <- function (list,grid){
 
 
   
-  #Transforming the coords in UTM
-  cord.dec_1 = SpatialPoints(cbind(long1, lat1), proj4string = CRS("+proj=longlat"))
-  cord.UTM_1 <- spTransform(cord.dec_1, CRS(proj4string(shp)))
-  cord_1 <- data.frame(cord.UTM_1@coords, stringsAsFactors=F)
-  cord_1_a <- data.frame(cord.UTM_1@coords, id="A", stringsAsFactors=F)
-  coordinates(cord_1_a) <- ~ long1 + lat1
-  proj4string(cord_1_a) <- proj4string(shp)
-  
-  cord.dec_2 = SpatialPoints(cbind(long2, lat2), proj4string = CRS("+proj=longlat"))
-  cord.UTM_2 <- spTransform(cord.dec_2, CRS(proj4string(shp)))
-  cord_2 <- data.frame(cord.UTM_2@coords, stringsAsFactors=F)
-  cord_2_a <- data.frame(cord.UTM_2@coords, id="A", stringsAsFactors=F)
-  coordinates(cord_2_a) <- ~ long2 + lat2
-  proj4string(cord_2_a) <- proj4string(shp)
+  ##Transforming the coords in UTM
+  #cord.dec_1 = SpatialPoints(cbind(long1, lat1), proj4string = CRS("+proj=longlat"))
+  #cord.UTM_1 <- spTransform(cord.dec_1, CRS(proj4string(shp)))
+  #cord_1 <- data.frame(cord.UTM_1@coords, stringsAsFactors=F)
+  #cord_1_a <- data.frame(cord.UTM_1@coords, id="A", stringsAsFactors=F)
+  #coordinates(cord_1_a) <- ~ long1 + lat1
+  #proj4string(cord_1_a) <- proj4string(shp)
+  #
+  #cord.dec_2 = SpatialPoints(cbind(long2, lat2), proj4string = CRS("+proj=longlat"))
+  #cord.UTM_2 <- spTransform(cord.dec_2, CRS(proj4string(shp)))
+  #cord_2 <- data.frame(cord.UTM_2@coords, stringsAsFactors=F)
+  #cord_2_a <- data.frame(cord.UTM_2@coords, id="A", stringsAsFactors=F)
+  #coordinates(cord_2_a) <- ~ long2 + lat2
+  #proj4string(cord_2_a) <- proj4string(shp)
   
   
   #Getting the id of the different squares
-  idp <- over(cord_1_a,grid)
-  idd <- over(cord_2_a,grid)
-  
-  
+
+  #idp <- over(cord_1_a,grid)
+  #idd <- over(cord_2_a,grid)
+  case_depart <- as.numeric(over_2(long1,lat1,grid))
+  case_arrivee <- as.numeric(over_2(long2,lat2,grid))
  
-  return(c(#cord_1[1],cord_1[2],cord_2[1],cord_2[2], #if we also want the UTM coords
+  return(data.frame(#cord_1[1],cord_1[2],cord_2[1],cord_2[2], #if we also want the UTM coords
+
 
     
-    long1,lat1,long2,lat2,
-    
-    idp,idd
+    long1,lat1,long2,lat2,case_depart,case_arrivee
     
     #,day,month,week # if we want other data about the date
     
     
-    ,week_day,hour,price,passenger)) # week_day 1 states for monday
+    ,week_day,hour,price,passenger))# week_day 1 states for monday
+
   
   
   
 }
 
-
 ```
 
-
 ```{r}
-
+precision <- 2
 
 #Fonction qui donne le dataset final mais que pour un trajet initial (de A à B) 
 path <- function(pretty_row) {
-  pretty_row <- test_row
   coordA <- c(pretty_row[[1]],pretty_row[[2]])
   coordB <- c(pretty_row[[3]],pretty_row[[4]])
   IDA <- pretty_row[[5]]
@@ -230,7 +223,7 @@ path <- function(pretty_row) {
   
   #on calcule le pas vectoriel et le nb d'itération :
   distance <- distm(coordA,coordB)
-  niteration = as.integer(distance / (largeur_cellule/5))
+  niteration = as.integer(distance / (largeur_cellule/precision))
   pas = 1/niteration
   pas_vectoriel <- as.vector((coordB-coordA)*pas)
   
@@ -252,21 +245,41 @@ path <- function(pretty_row) {
   return(final_df)
 }
 
+safe_path <- safely(path)
+
+path(test[10,])
+```
+
+
+```{r}
+
+train_test <- train[1:100000,]
+
+
 
 good_dataframe<-function(df,grid){
-  #il reste encore un ou deux bugs
+
   #creates a whole dataframe with clean data
   
-  map_df(df,~transformation(.x),grid)
+  return(map_df(1:nrow(df),~transformation(df[.x,],grid)))
   
-  
-}
+  }
 
-good_dataframe(test,spatial_grid)
+test <- good_dataframe(train_test,spatial_grid)
+#summary(test)
+discretisation_dataframe <- function(good_df) {
+
+  return(map_df(1:nrow(good_df), ~ safe_path(good_df[.x,])[[1]]))
   
-  
-  
+  }
+
+test_2 <- discretisation_dataframe(test)
+
+test_2_gpby <- test_2 %>% group_by(IDs, Passagers, Jour, Heure) %>% summarise(nb = sum(nb), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
+
+total_test <- discretisation_dataframe(good_dataframe(train,spatial_grid)) %>% group_by(IDs, Passagers, Jour, Heure) %>% summarise(nb = sum(nb), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
 
 
+write.csv(total_test, file = "model_result_with_200000_data.csv")
 ```
 
