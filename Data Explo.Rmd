@@ -1,0 +1,59 @@
+---
+title: "Untitled"
+author: "Simon Tirman"
+date: "12/3/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(DataExplorer)
+library(Hmisc)
+
+```
+
+
+```{r}
+largeur_cellule <- 200
+train <- read.csv("train-000.csv", sep = ",")
+test <- read.csv("data/test.csv", sep = ",")
+#head(train)
+cleaning <- function(train) {
+  train_df <- train %>% filter(fare_amount >=0) %>% filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20, pickup_latitude < 60, dropoff_longitude > -100, dropoff_longitude < -50, dropoff_latitude > 20, dropoff_latitude < 60)
+  return(train_df)
+}
+train <- cleaning(train)
+```
+
+```{r}
+summary(train)
+describe(train, condense=TRUE)
+data_exploration <- function (train) {
+
+plot(density(train$fare_amount))
+plot(train$fare_amount)
+abline(mean(train$fare_amount)+4*sd(train$fare_amount),0, col="blue")
+ 
+boxplot(train$fare_amount)
+hist(train$passenger_count, breaks = 8, col = sample(colours(), 10))
+
+plot_correlation(train)
+
+
+train['abs_lat_diff'] <- abs(train['dropoff_latitude'] - train['pickup_latitude'])
+train['abs_lon_diff'] <- abs(train['dropoff_longitude'] - train['pickup_longitude'])
+train['cut'] <- cut2(train$fare_amount,seq(0,50, by=5))
+ggplot(train, aes(abs_lat_diff, abs_lon_diff)) +
+  geom_point(aes(colour = factor(train$cut)))+
+  xlim(0,1) +
+  ylim(0,1)
+}
+data_exploration(train)
+```
