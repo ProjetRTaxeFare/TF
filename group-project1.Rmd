@@ -34,7 +34,7 @@ largeur_cellule <- 200
 #test <- read.csv("data/test.csv", sep = ",")
 #head(train)
 test=train_000
-test <- read.csv("train-000.csv", sep = ",")
+#test <- read.csv("train-000.csv", sep = ",")
 #head(train)
 summary(test)
 cleaning <- function(train) {
@@ -160,9 +160,16 @@ transformation <- function (list,grid){
   
 
   #Retrieving the day and the hour
-  day <- as.numeric(substr(key,9,10))
-  hour <- as.numeric(substr(key,12,13))
-  
+  # day <- as.Date(substr(key,1,10))
+  # hour <- as.POSIXct(substr(key,12,19))
+  date_final <- as.POSIXlt(key, tz = "UTC")
+  hour <- date_final$hour 
+  day <- date_final$mday
+  month <- date_final$mon
+  year <- date_final$year
+  week_day <- date_final$wday
+
+
   
   #Transforming the coords in UTM
   cord.dec_1 = SpatialPoints(cbind(long1, lat1), proj4string = CRS("+proj=longlat"))
@@ -191,13 +198,20 @@ transformation <- function (list,grid){
     
     long1,lat1,long2,lat2,
     
-    idp,idd,day,hour,price,passenger))
+    idp,idd
+    
+    #,day,month,week # if we want other data about the date
+    
+    
+    ,week_day,hour,price,passenger)) # week_day 1 states for monday
   
   
   
 }
 
+
 ```
+
 
 ```{r}
 
@@ -256,43 +270,3 @@ good_dataframe(test,spatial_grid)
 
 ```
 
-
-Pour la date : Create and format dates
-To create a Date object from a simple character string in R, you can use the as.Date() function. The character string has to obey a format that can be defined using a set of symbols (the examples correspond to 13 January, 1982):
-
-%Y: 4-digit year (1982)
-%y: 2-digit year (82)
-%m: 2-digit month (01)
-%d: 2-digit day of the month (13)
-%A: weekday (Wednesday)
-%a: abbreviated weekday (Wed)
-%B: month (January)
-%b: abbreviated month (Jan)
-The following R commands will all create the same Date object for the 13th day in January of 1982:
-
-as.Date("1982-01-13")
-as.Date("Jan-13-82", format = "%b-%d-%y")
-as.Date("13 January, 1982", format = "%d %B, %Y")
-Notice that the first line here did not need a format argument, because by default R matches your character string to the formats "%Y-%m-%d" or "%Y/%m/%d".
-
-In addition to creating dates, you can also convert dates to character strings that use a different date notation. For this, you use the format() function. Try the following lines of code:
-
-today <- Sys.Date()
-format(Sys.Date(), format = "%d %B, %Y")
-format(Sys.Date(), format = "Today is a %A!")
-
-
-Pour l'Heure  : 
-Create and format times
-Similar to working with dates, you can use as.POSIXct() to convert from a character string to a POSIXct object, and format() to convert from a POSIXct object to a character string. Again, you have a wide variety of symbols:
-
-%H: hours as a decimal number (00-23)
-%I: hours as a decimal number (01-12)
-%M: minutes as a decimal number
-%S: seconds as a decimal number
-%T: shorthand notation for the typical format %H:%M:%S
-%p: AM/PM indicator
-For a full list of conversion symbols, consult the strptime documentation in the console:
-
-?strptime
-Again,as.POSIXct() uses a default format to match character strings. In this case, it's %Y-%m-%d %H:%M:%S. In this exercise, abstraction is made of different time zones.
