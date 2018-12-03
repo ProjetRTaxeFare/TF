@@ -16,10 +16,17 @@ server <- function(input, output, session) {
   
   output$mapWarsaw <- renderGoogle_map({
     google_map(key = map_key, 
+               location = "New York City",
                search_box = TRUE, 
                scale_control = TRUE, 
                height = 1000) %>%
       add_traffic()
+  })
+  observeEvent(input$mapWarsaw_click, {
+    click <- input$mapWarsaw_click
+    clat <- click$lat
+    clng <- click$lng
+    
   })
   
   observeEvent(input$getRoute,{
