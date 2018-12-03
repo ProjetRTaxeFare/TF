@@ -24,7 +24,6 @@ library("rgdal")
 library("lattice")
 library(geosphere)
 
-
 ```
 
 
@@ -39,6 +38,7 @@ cleaning <- function(train) {
   return(train_df)
 }
 train <- cleaning(train)
+
 ```
 
 ```{r}
@@ -155,9 +155,16 @@ transformation <- function (list,grid){
   
 
   #Retrieving the day and the hour
-  day <- as.numeric(substr(key,9,10))
-  hour <- as.numeric(substr(key,12,13))
-  
+  # day <- as.Date(substr(key,1,10))
+  # hour <- as.POSIXct(substr(key,12,19))
+  date_final <- as.POSIXlt(key, tz = "UTC")
+  hour <- date_final$hour 
+  day <- date_final$mday
+  month <- date_final$mon
+  year <- date_final$year
+  week_day <- date_final$wday
+
+
   
   ##Transforming the coords in UTM
   #cord.dec_1 = SpatialPoints(cbind(long1, lat1), proj4string = CRS("+proj=longlat"))
@@ -176,6 +183,7 @@ transformation <- function (list,grid){
   
   
   #Getting the id of the different squares
+
   #idp <- over(cord_1_a,grid)
   #idd <- over(cord_2_a,grid)
   case_depart <- as.numeric(over_2(long1,lat1,grid))
@@ -183,10 +191,15 @@ transformation <- function (list,grid){
  
   return(data.frame(#cord_1[1],cord_1[2],cord_2[1],cord_2[2], #if we also want the UTM coords
 
+
     
-    long1,lat1,long2,lat2,
+    long1,lat1,long2,lat2,case_depart,case_arrivee
     
-    case_depart,case_arrivee,day,hour,price,passenger))
+    #,day,month,week # if we want other data about the date
+    
+    
+    ,week_day,hour,price,passenger))# week_day 1 states for monday
+
   
   
   
@@ -237,10 +250,15 @@ safe_path <- safely(path)
 path(test[10,])
 ```
 
+
 ```{r}
+
 train_test <- train[1:100000,]
 
+
+
 good_dataframe<-function(df,grid){
+
   #creates a whole dataframe with clean data
   
   return(map_df(1:nrow(df),~transformation(df[.x,],grid)))
@@ -264,6 +282,4 @@ total_test <- discretisation_dataframe(good_dataframe(train,spatial_grid)) %>% g
 
 write.csv(total_test, file = "model_result_with_200000_data.csv")
 ```
-
-
 
