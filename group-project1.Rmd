@@ -281,5 +281,9 @@ total_test <- discretisation_dataframe(good_dataframe(train,spatial_grid)) %>% g
 
 
 write.csv(total_test, file = "model_result_with_200000_data.csv")
+
+#Salut
+
+
 ```
 
