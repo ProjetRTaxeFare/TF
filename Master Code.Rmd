@@ -19,6 +19,7 @@ library(purrr)
 library(ggplot2)
 library(rgdal)
 library(sp)
+library(readr)
 library(maptools)
 library("rgdal")
 library("lattice")
@@ -31,7 +32,7 @@ library(Hmisc)
 
 
 ```{r}
-largeur_cellule <- 200
+largeur_cellule <- 500
 train <- read.csv("train-000.csv", sep = ",")
 test <- read.csv("data/test.csv", sep = ",")
 url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
@@ -167,7 +168,7 @@ transformation <- function (list,grid){
   #We want to clean the data in order to use it efficiently late. 
   
   #Calling the variables
-  key <- as.character(list[3])
+  key <- list[[1]]
   price <- as.numeric(list[2])
   long1 <- as.numeric(list[4])
   lat1 <- as.numeric(list[5])
@@ -175,49 +176,39 @@ transformation <- function (list,grid){
   lat2 <- as.numeric(list[7])
   passenger <- as.numeric(list[8])
   
-  #Retrieving the day and the hour
-  day <- as.numeric(substr(key,9,10))
-  hour <- as.numeric(substr(key,12,13))
-  
-  date_final <- as.POSIXlt(key, tz = "UTC")
+  date_final <- as.POSIXlt(key)
    hour <- date_final$hour 
    day <- date_final$mday
    month <- date_final$mon
    year <- date_final$year
    week_day <- date_final$wday
-  ##Transforming the coords in UTM
-  #cord.dec_1 = SpatialPoints(cbind(long1, lat1), proj4string = CRS("+proj=longlat"))
-  #cord.UTM_1 <- spTransform(cord.dec_1, CRS(proj4string(shp)))
-  #cord_1 <- data.frame(cord.UTM_1@coords, stringsAsFactors=F)
-  #cord_1_a <- data.frame(cord.UTM_1@coords, id="A", stringsAsFactors=F)
-  #coordinates(cord_1_a) <- ~ long1 + lat1
-  #proj4string(cord_1_a) <- proj4string(shp)
-  #
-  #cord.dec_2 = SpatialPoints(cbind(long2, lat2), proj4string = CRS("+proj=longlat"))
-  #cord.UTM_2 <- spTransform(cord.dec_2, CRS(proj4string(shp)))
-  #cord_2 <- data.frame(cord.UTM_2@coords, stringsAsFactors=F)
-  #cord_2_a <- data.frame(cord.UTM_2@coords, id="A", stringsAsFactors=F)
-  #coordinates(cord_2_a) <- ~ long2 + lat2
-  #proj4string(cord_2_a) <- proj4string(shp)
-  
   
   #Getting the id of the different squares
-  #idp <- over(cord_1_a,grid)
-  #idd <- over(cord_2_a,grid)
+
   case_depart <- as.numeric(over_2(long1,lat1,grid))
   case_arrivee <- as.numeric(over_2(long2,lat2,grid))
  
-  return(data.frame(#cord_1[1],cord_1[2],cord_2[1],cord_2[2], #if we also want the UTM coords
+  return(data.frame(
     
     long1,lat1,long2,lat2,
     
-    case_depart,case_arrivee,day,hour,price,passenger))
+    case_depart,case_arrivee,week_day,hour,price,passenger))
   
   
   
 }
+
 ```
 
+```{r}
+hour_filter <- function(heure){
+  return(case_when(heure %in% 0:4 ~ "0-5", 
+                   heure %in% 5:9 ~ "5-10", 
+                   heure %in% 10:15 ~ "10-16", 
+                   heure %in% 16:20 ~ "16-21", 
+                   heure %in% 21:23 ~ "21-0"))
+}
+```
 
 
 
@@ -247,34 +238,131 @@ path <- function(pretty_row) {
   etapes_df <- do.call(rbind.data.frame, etapes_Ids)
   names(etapes_df)[1] <- "IDs"
   
-  final_df <- etapes_df %>% mutate("Prix" = prix_parcours/niteration, "Passagers" = passagers, "Jour" = jour, "Heure" = heure)
+  final_df <- etapes_df %>% mutate("Prix" = prix_parcours/niteration, "Passagers" = passagers, "Jour" = jour, "Heure" = heure) %>% mutate("Creneau_Horaire" = hour_filter(heure))
   
   final_df <- final_df %>% 
-    group_by(IDs, Passagers, Jour, Heure) %>% 
-    summarise(nb = n(), Prix = sum(Prix)) %>% 
+    group_by(IDs, Passagers, Jour, Creneau_Horaire) %>% 
+    summarise(precision = n(), Prix = sum(Prix)) %>% 
     ungroup()  
   return(final_df)
 }
 safe_path <- safely(path)
-# path(test[10,])
+
 ```
 
+##Création de la base modèle
+
 ```{r}
-train_test <- train[1:100000,]
+#train_test <- train
 good_dataframe<-function(df,grid){
   #creates a whole dataframe with clean data
   
   return(map_df(1:nrow(df),~transformation(df[.x,],grid)))
   
   }
-test <- good_dataframe(train_test,spatial_grid)
+
+
+#test <- good_dataframe(train_test,spatial_grid)
 #summary(test)
+
 discretisation_dataframe <- function(good_df) {
   return(map_df(1:nrow(good_df), ~ safe_path(good_df[.x,])[[1]]))
-  
-  }
-test_2 <- discretisation_dataframe(test)
-test_2_gpby <- test_2 %>% group_by(IDs, Passagers, Jour, Heure) %>% summarise(nb = sum(nb), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
-total_test <- discretisation_dataframe(good_dataframe(train,spatial_grid)) %>% group_by(IDs, Passagers, Jour, Heure) %>% summarise(nb = sum(nb), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
-write.csv(total_test, file = "model_result_with_200000_data.csv")
+}
+
+#test_2 <- discretisation_dataframe(test)
+
+#test_2_gpby <- test_2 %>% group_by(IDs, Passagers, Jour, Creneau_Horaire) %>% summarise(precision = sum(precision), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
+
+#total_test <- discretisation_dataframe(good_dataframe(train,spatial_grid)) %>% group_by(IDs, Passagers, Jour, Heure) %>% summarise(nb = sum(nb), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
+
+#write.csv(total_test, file = "model_result_with_200000_data.csv")
 ```
+
+##Calcul du prix :
+
+```{r}
+model_df <- total_test
+
+ajout_precision <- 10
+
+transform_row <- function(data_row) {
+  xA <- as.numeric(data_row[[4]])
+  yA <- as.numeric(data_row[[5]])
+  xB <- as.numeric(data_row[[6]])
+  yB <- as.numeric(data_row[[7]])
+  key <- data_row[[3]]
+  date_final <- as.POSIXlt(key)
+   hour <- date_final$hour 
+   week_day <- date_final$wday
+  passagers <- as.numeric(data_row[[8]])
+  return(c(xA,yA,xB,yB,week_day,hour,passagers))
+}
+
+
+```
+
+```{r}
+predict <- function(travel) {
+  #Data : 
+  coordA <- c(travel[[1]],travel[[2]])
+  coordB <- c(travel[[3]],travel[[4]])
+  jour <- travel[[5]]
+  heure <- travel[[6]]
+  passagers <- travel[[7]]
+  
+  #Calculs :
+  creneau <- hour_filter(heure)
+  
+  
+  #on calcule le pas vectoriel et le nb d'itération :
+  distance <- distm(coordA,coordB)
+  if (distance == 0) {
+    return(c(0.,1.))
+  } else {
+  niteration = as.integer(distance / (largeur_cellule/(ajout_precision*precision)))
+  pas = 1/niteration
+  pas_vectoriel <- as.vector((coordB-coordA)*pas)
+  
+  infos <- 1:niteration
+  etapes_coords <- map(infos, ~ coordA + pas_vectoriel*.x)
+  etapes_Ids <- map(etapes_coords, ~ over_2(.x[[1]],.x[[2]],spatial_grid)[[1,1]])
+  
+  etapes_df <- do.call(rbind.data.frame, etapes_Ids)
+  names(etapes_df)[1] <- "IDs"
+  
+  calcul_df <- etapes_df %>% mutate("Passagers" = passagers, "Jour" = jour, "Creneau_Horaire" = creneau)
+  
+  calcul_df <- calcul_df %>% 
+    group_by(IDs, Passagers, Jour, Creneau_Horaire) %>% 
+    summarise(nb = n()) %>% 
+    ungroup() %>% left_join(model_df, by = c("IDs", "Jour", "Creneau_Horaire", "Passagers"))
+  
+  missing_data <- sum(as.numeric(is.na(calcul_df$prix_moyen)) * calcul_df$nb)
+  
+  final_price <- sum(calcul_df$prix_moyen * calcul_df$nb /(precision*ajout_precision), na.rm = TRUE) * (1+missing_data/niteration)
+  
+  return(c(final_price, missing_data/niteration)) }
+}
+
+predict_raw_data <- compose(predict, transform_row)
+
+
+```
+
+```{r}
+#Final test
+test_base_init <- read_csv("train-001.csv")
+
+test_base <- test_base_init[sample(200000,100),]
+
+preds <- apply(test_base,1,predict_raw_data)
+
+test_pred <- test_base %>% mutate(pred = preds[1,], estim_erro = preds[2,])
+
+test_pred$ID = row.names(test_pred)
+final_test_plot <- test_pred  %>% gather(key = "Real_vs_Pred", value = "Cost", fare_amount, pred) %>% select(-1:-8)
+
+ggplot(data = final_test_plot , aes(x = ID, y = Cost, color = Real_vs_Pred)) + geom_point() 
+
+```
+
