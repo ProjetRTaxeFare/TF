@@ -273,9 +273,9 @@ discretisation_dataframe <- function(good_df) {
 
 #test_2_gpby <- test_2 %>% group_by(IDs, Passagers, Jour, Creneau_Horaire) %>% summarise(precision = sum(precision), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
 
-#total_test <- discretisation_dataframe(good_dataframe(train,spatial_grid)) %>% group_by(IDs, Passagers, Jour, Heure) %>% summarise(nb = sum(nb), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
+total_test <- discretisation_dataframe(good_dataframe(train,spatial_grid)) %>% group_by(IDs, Passagers, Jour, Creneau_Horaire) %>% summarise(precision = sum(precision), prix_moyen = mean(Prix)) %>% filter(is.na(IDs) == FALSE)
 
-#write.csv(total_test, file = "model_result_with_200000_data.csv")
+write.csv(total_test, file = "final_model_result_with_200000_data.csv")
 ```
 
 ##Calcul du prix :
@@ -341,8 +341,8 @@ predict <- function(travel) {
   
   final_price <- sum(calcul_df$prix_moyen * calcul_df$nb /(precision*ajout_precision), na.rm = TRUE) * (1+missing_data/niteration)
   
-  return(c(final_price, missing_data/niteration)) }
-}
+  return(final_price)#, missing_data/niteration)) }
+}}
 
 predict_raw_data <- compose(predict, transform_row)
 
@@ -350,19 +350,47 @@ predict_raw_data <- compose(predict, transform_row)
 ```
 
 ```{r}
-#Final test
-test_base_init <- read_csv("train-001.csv")
+#La suite a pour seul but de vérifier que notre test est plus adapté qu'une simple régression linéaire en fonction de la distance. 
 
-test_base <- test_base_init[sample(200000,100),]
-
-preds <- apply(test_base,1,predict_raw_data)
-
-test_pred <- test_base %>% mutate(pred = preds[1,], estim_erro = preds[2,])
-
-test_pred$ID = row.names(test_pred)
-final_test_plot <- test_pred  %>% gather(key = "Real_vs_Pred", value = "Cost", fare_amount, pred) %>% select(-1:-8)
-
-ggplot(data = final_test_plot , aes(x = ID, y = Cost, color = Real_vs_Pred)) + geom_point() 
-
+##Final test
+#test_base_init <- read_csv("train-001.csv")
+#train_lm <- train %>% rowwise() %>% mutate(distance = distm(c(pickup_longitude, #pickup_latitude),c(dropoff_longitude,dropoff_latitude))[1,1])
+#
+##À tester :
+#test_base <- test_base_init[sample(200000,10),]
+#
+##safe_predict_raw_data <- safely(predict_raw_data)
+#
+#preds <- apply(test_base,1,predict_raw_data)
+#
+#preds_df <- data.frame(preds)
+#data.frame(preds[[1]])
+#test_pred <- test_base %>% mutate(pred = as.numeric(preds_df[[1]]))
+#
+#test_pred$ID = row.names(test_pred)
+#final_test_plot <- test_pred  %>% gather(key = "Real_vs_Pred", value = "Cost", fare_amount, pred) %>% select(-1:-8)
+#
+#ggplot(data = final_test_plot , aes(x = ID, y = Cost, color = Real_vs_Pred)) + geom_point() 
+#
+#
+#ggplot(data = test_pred %>% mutate(diff = fare_amount - pred), aes(x = ID, y = diff)) + geom_point() 
+#
+#test_pred <- test_pred %>% mutate(diff = fare_amount - pred) 
+#
+#res.lm <- lm(fare_amount ~ distance, data = train_lm)
+#summary(res.lm)
+#test_pred <- test_pred %>% rowwise() %>% mutate(lm_pred = res.lm$coefficients[1] + res.lm$coefficients[2] * #distm(c(pickup_longitude, pickup_latitude),c(dropoff_longitude,dropoff_latitude))[1,1]) 
+#
+#test_pred <- test_pred %>% mutate(diff_lm = fare_amount - lm_pred)
+#
+#test_pred_plot <- test_pred %>% gather(key = "Real_vs_Pred", value = "Cost", diff, diff_lm) %>% select(-1:-10)
+#
+#
+#ggplot(data = test_pred_plot , aes(x = ID, y = Cost, color = Real_vs_Pred)) + geom_point() 
+#
+#mean(test_pred$diff)
+#mean(test_pred$diff_lm)
+#
+#ggplot(data = test_pred_plot, aes(x = Real_vs_Pred, y = Cost)) + geom_boxplot()
 ```
 
