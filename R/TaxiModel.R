@@ -23,8 +23,6 @@
 #'         passenger id
 #' @export
 #'
-#' @examples
-#' transformation(train[2,],spatial_grid)
 transformation <- function (list,grid){
 
   #We want to clean the data in order to use it efficiently later.
@@ -68,8 +66,6 @@ transformation <- function (list,grid){
 #' @return a string which will detail which time zone the input hour corresponds to (there are 5 per day, "0-5", "5-10")
 #' @export
 #'
-#' @examples
-#' hour_filter(13:08:24)
 hour_filter <- function(heure){
   return(case_when(heure %in% 0:4 ~ "0-5",
                    heure %in% 5:9 ~ "5-10",
@@ -92,8 +88,6 @@ hour_filter <- function(heure){
 #' @import purrr
 #' @import dplyr
 #'
-#' @examples
-#' path(transformation(train[2,],spatial_grid))
 path <- function(pretty_row) {
 
   precision <- 2
@@ -140,8 +134,6 @@ path <- function(pretty_row) {
 #' @export
 #' @import purrr
 #'
-#' @examples
-#' good_dataframe(train[1;10,],spatial_grid)
 good_dataframe<-function(df,grid){
   #creates a whole dataframe with clean data
 
@@ -156,8 +148,6 @@ good_dataframe<-function(df,grid){
 #' @return A whole dataframe containing errors or the final data
 #' @export
 #' @import purrr
-#' @examples
-#' discretisation_dataframe(good_dataframe(train[1;10,],spatial_grid))
 discretisation_dataframe <- function(good_df) {
   return(map_df(1:nrow(good_df), ~ safely(path(good_df[.x,])[[1]])))
 }
@@ -170,8 +160,6 @@ discretisation_dataframe <- function(good_df) {
 #' @return a vector containing the pickup and dropoff coordinates, week day, hour and passengers
 #' @export
 #'
-#' @examples
-#' TODO check this header
 transform_row <- function(data_row) {
   xA <- as.numeric(data_row[[4]])
   yA <- as.numeric(data_row[[5]])
@@ -196,8 +184,6 @@ transform_row <- function(data_row) {
 #' @import geosphere
 #' @import dplyr
 #' @import purrr
-#' @examples
-#' predict(TODO)
 predict <- function(travel) {
   #Data :
   coordA <- c(travel[[1]],travel[[2]])
