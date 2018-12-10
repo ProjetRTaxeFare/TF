@@ -180,14 +180,14 @@ points(proj$cord2.coords.x1, proj$cord2.coords.x2, pch=19, col="red")
 
 
 
-# Permet de calculer l'idea pour chaque point
-#' Title
+
+#' Return Id from our grid given latitude and longitude inputs
 #'
-#' @param long
-#' @param lat
-#' @param grid
+#' @param long double representing the longitude
+#' @param lat double representing the latitude
+#' @param grid the spatialgrid of interest
 #'
-#' @return
+#' @return Id from our grid
 #' @export
 #'
 #' @examples
