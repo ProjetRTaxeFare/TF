@@ -10,3 +10,12 @@ Description: Cool Stuff.
 License: MIT
 Encoding: UTF-8
 LazyData: true
+Imports: 
+    ggplot2,
+    dplyr,
+    DataExplorer,
+    maptools,
+    readr,
+    utils,
+    rgdal,
+    sp

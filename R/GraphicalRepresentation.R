@@ -1,37 +1,14 @@
-library(dplyr)
-library(tidyr)
-library(purrr)
-library(ggplot2)
-library(rgdal)
-library(sp)
-library(readr)
-library(maptools)
-library("rgdal")
-library("lattice")
-library(geosphere)
-library(DataExplorer)
-library(Hmisc)
 
 
-
-
-
-largeur_cellule <- 500
-train <- read.csv("train-000.csv", sep = ",")
-test <- read.csv("data/test.csv", sep = ",")
-url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
-
-
-#' Elimination of location that are not in New york and its suburbs
+#' Deletion of location that are not in New york and its suburbs
 #'
 #' @param train object of class dataset
 #'
 #' @return A new dataframe with locations of interest as observation
 #' @export
-#' @import dplyr
+#' @importFrom dplyr filter
 #'
 #' @examples
-#' cleaning(train[1:5,])
 cleaning <- function(train) {
   train_df <- train %>% filter(fare_amount >=0) %>%
     filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20,
@@ -40,58 +17,21 @@ cleaning <- function(train) {
   return(train_df)
 }
 
-train <- cleaning(train)
-
-
-
-#' Initial data exploration
-#'
-#' @param train objet of class dataset
-#'
-#' @return une suite de statistiques descriptives
-#' @export
-#' @import ggplot2
-#'
-#' @examples
-#' \dontrun{
-#' data("destrains")
-#' data_exloration("untrain")
-#' }
-
-data_exploration <- function (train) {
-  # summary(train)
-  plot(density(train$fare_amount))
-  plot(train$fare_amount)
-  abline(mean(train$fare_amount)+4*sd(train$fare_amount),0, col="blue")
-
-  boxplot(train$fare_amount)
-  hist(train$passenger_count, breaks = 8, col = sample(colours(), 10))
-  plot_correlation(train)
-  describe(train)
-  train['abs_lat_diff'] <- abs(train['dropoff_latitude'] - train['pickup_latitude'])
-  train['abs_lon_diff'] <- abs(train['dropoff_longitude'] - train['pickup_longitude'])
-  train['cut'] <- cut2(train$fare_amount,seq(0,50, by=5))
-  ggplot(train, aes(abs_lat_diff, abs_lon_diff)) +
-    geom_point(aes(colour = factor(train$cut)))+
-    xlim(0,1) +
-    ylim(0,1)
-}
-data_exploration(train)
-
-
-
 
 #' Title
 #'
-#' @param url
+#' @param url Information online about NYC
 #'
-#' @return
+#' @return the shapefile
 #' @export
-#'
+#' @import maptools
+#' @import utils
+#' @import rgdal
 #' @examples
 proj_shp <- function (url) {
+  url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
   shpurl <- url
-  tmp    <- tempfile(fileext=".zip")
+  tmp <- tempfile(fileext=".zip")
   download.file(shpurl, destfile=tmp)
   files <- unzip(tmp, exdir=getwd())
   # Load & plot shapefile
@@ -108,10 +48,11 @@ proj_shp <- function (url) {
 #' Title
 #'
 #' @param shp
-#' @param train
+#' @param train the clean version from the cleaning function
 #'
-#' @return
+#' @return Useful result to plot our data on the good grid
 #' @export
+#' @import sp
 #'
 #' @examples
 proj_cord <- function (shp, train) {
@@ -134,14 +75,15 @@ proj_cord <- function (shp, train) {
 ### SpatialGrid object
 #' Title
 #'
-#' @param shp
-#' @param largeur_cellule
+#' @param shapefile Geographical object for NYC
+#' @param largeur_cellule Parameter to know how precise we cut our travel in our cells
 #'
-#' @return
+#' @return Final spatial grid used in our functions to create the data set model
 #' @export
+#' @import sp
 #'
 #' @examples
-grid <- function (shp,largeur_cellule) {
+grid <- function (shp,largeur_cellule = 500) {
   bb <- bbox(shp)
   cellsize <- c(3.28084, 3.28084)*largeur_cellule  # cell size 1000m
   # 1 ft = 3.28084 m
@@ -155,25 +97,25 @@ grid <- function (shp,largeur_cellule) {
 }
 
 
+#' Return the Spatial Grid that will serve as the domain
+#'
+#' @param
+#'
+#' @return The spatial grid from scratch to save it in our data folder to be used in the model side
+#' @export
+#' @importFrom utils system.file
+#'
+#' @examples
+main <- function(){
+  largeur_cellule <- 500
+  file <- system.file("data_clean/train-000.csv", package = "TFpackage")
+  train <- read.csv(file, sep = ",")
+  train <- cleaning(train)
+  shp <- proj_shp("https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip")
+  spatial_grid <- grid(shp,largeur_cellule)
+  return(spatial_grid)
+}
 
-
-shp <- proj_shp(url)
-proj <- proj_cord(shp,train)
-cord <- (proj_cord(shp,train))$cord
-cord2 <- (proj_cord(shp,train))$cord2
-spatial_grid <- grid(shp,largeur_cellule)
-spplot(spatial_grid, "id",
-       panel = function(...) {
-         panel.gridplot(..., border="black")
-         sp.polygons(shp)
-         #panel.text(...)
-       })
-over(cord, spatial_grid)
-summary(over(cord, spatial_grid))
-# Plot coordinates
-cord
-plot(shp)
-points(proj$cord2.coords.x1, proj$cord2.coords.x2, pch=19, col="red")
 
 
 
