@@ -1,5 +1,3 @@
-
-
 #' Deletion of location that are not in New york and its suburbs
 #'
 #' @param train object of class dataset
@@ -8,7 +6,6 @@
 #' @export
 #' @importFrom dplyr filter
 #'
-#' @examples
 cleaning <- function(train) {
   train_df <- train %>% filter(fare_amount >=0) %>%
     filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20,
@@ -27,7 +24,6 @@ cleaning <- function(train) {
 #' @import maptools
 #' @import utils
 #' @import rgdal
-#' @examples
 proj_shp <- function (url) {
   url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
   shpurl <- url
@@ -47,14 +43,13 @@ proj_shp <- function (url) {
 
 #' Title
 #'
-#' @param shp
+#' @param shp shapefile
 #' @param train the clean version from the cleaning function
 #'
 #' @return Useful result to plot our data on the good grid
 #' @export
 #' @import sp
 #'
-#' @examples
 proj_cord <- function (shp, train) {
 
   cord.dec = SpatialPoints(cbind(train$pickup_longitude, train$pickup_latitude), proj4string = CRS("+proj=longlat"))
@@ -82,7 +77,6 @@ proj_cord <- function (shp, train) {
 #' @export
 #' @import sp
 #'
-#' @examples
 grid <- function (shp,largeur_cellule = 500) {
   bb <- bbox(shp)
   cellsize <- c(3.28084, 3.28084)*largeur_cellule  # cell size 1000m
@@ -103,9 +97,7 @@ grid <- function (shp,largeur_cellule = 500) {
 #'
 #' @return The spatial grid from scratch to save it in our data folder to be used in the model side
 #' @export
-#' @importFrom utils system.file
 #'
-#' @examples
 main <- function(){
   largeur_cellule <- 500
   file <- system.file("data_clean/train-000.csv", package = "TFpackage")
@@ -130,7 +122,6 @@ main <- function(){
 #' @return Id from our grid
 #' @export
 #'
-#' @examples
 over_2 <- function (long, lat, grid) {
   cord.dec = SpatialPoints(cbind(long, lat), proj4string = CRS("+proj=longlat"))
   cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
