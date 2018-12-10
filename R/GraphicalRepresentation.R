@@ -1,6 +1,3 @@
-train <- read.csv("train-000.csv", sep = ",")
-test <- read.csv("data/test.csv", sep = ",")
-url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
 
 
 #' Deletion of location that are not in New york and its suburbs
@@ -12,8 +9,6 @@ url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/ny
 #' @importFrom dplyr filter
 #'
 #' @examples
-#' data(train)
-#' train <- cleaning(train[1:5,])
 cleaning <- function(train) {
   train_df <- train %>% filter(fare_amount >=0) %>%
     filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20,
@@ -30,8 +25,8 @@ cleaning <- function(train) {
 #' @return the shapefile
 #' @export
 #' @import maptools
-#' @importFrom utils
-#'
+#' @import utils
+#' @import rgdal
 #' @examples
 proj_shp <- function (url) {
   url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
@@ -57,6 +52,7 @@ proj_shp <- function (url) {
 #'
 #' @return Useful result to plot our data on the good grid
 #' @export
+#' @import sp
 #'
 #' @examples
 proj_cord <- function (shp, train) {
@@ -84,6 +80,7 @@ proj_cord <- function (shp, train) {
 #'
 #' @return Final spatial grid used in our functions to create the data set model
 #' @export
+#' @import sp
 #'
 #' @examples
 grid <- function (shp,largeur_cellule = 500) {
@@ -106,10 +103,9 @@ grid <- function (shp,largeur_cellule = 500) {
 #'
 #' @return The spatial grid from scratch to save it in our data folder to be used in the model side
 #' @export
-#' @import
+#' @importFrom utils system.file
 #'
 #' @examples
-#' main()
 main <- function(){
   largeur_cellule <- 500
   file <- system.file("data_clean/train-000.csv", package = "TFpackage")
