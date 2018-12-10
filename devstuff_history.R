@@ -7,6 +7,8 @@ usethis::use_package("readr")
 usethis::use_package("utils")
 usethis::use_package("rgdal")
 usethis::use_package("sp")
+usethis::use_package("purrr")
+usethis::use_package("geosphere")
 
 remotes::install_github("ThinkR-open/attachment")
 attachment::att_to_description(dir.v = "")
