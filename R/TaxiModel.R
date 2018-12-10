@@ -185,6 +185,9 @@ transform_row <- function(data_row) {
 #' @import dplyr
 #' @import purrr
 predict <- function(travel) {
+  precision <- 10
+  ajout_precision <- 5
+  data(model_df)
   #Data :
   coordA <- c(travel[[1]],travel[[2]])
   coordB <- c(travel[[3]],travel[[4]])
