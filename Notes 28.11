@@ -19,12 +19,11 @@ delete la branche utilisée jusque là, en commencer une nouvelle pour une nouve
 
 
 TODO :
-- faire une fonction “représentation” du code au début pour pas que ça soit dans l’environnement & pour le shinyapp
-shinyapp final : carte avec point de départ, point d’arrivée, qui donnera trajet & prix
-- Préparer la façon de demander les adresses de départ et de fin dans le shiny App (Rentrer une adresse puis chercher les coordonnées avec internet ? / Demander à cliquer sur une carte intéractive ? etc.)
-- Corriger l'extraction des infos "Date" et "Heure" dans la fonction transformation - Avec un format 1-7 et 0-23.
-- Commencer à réfléchir au format Package... 
-- 
+- Transformer MasterCode en .R avec les descriptions
+- Finir Data Explo pour en faire une vignette
+- Appeler les "usethis" pour finir de créer le package
+- Verifier que ça marche avec le code / Build - Check
+- Aller se pignoler pour fêter ça
 
 
 lien ggdoc :
