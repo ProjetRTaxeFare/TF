@@ -4,7 +4,7 @@
 \name{spatial_grid}
 \alias{spatial_grid}
 \title{dataset}
-\format{dataframe de x lignes et z colonnes}
+\format{spatial grid}
 \usage{
 spatial_grid
 }
