@@ -88,6 +88,9 @@ hour_filter <- function(heure){
 #' @return A data frame line which corresponds to a trip and contains :
 #'          ID, passenger, day of the week, time slot, precision and price
 #' @export
+#' @import geosphere
+#' @import purrr
+#' @import dplyr
 #'
 #' @examples
 #' path(transformation(train[2,],spatial_grid))
@@ -135,6 +138,7 @@ path <- function(pretty_row) {
 #'
 #' @return creates a whole dataframe with clean data
 #' @export
+#' @import purrr
 #'
 #' @examples
 #' good_dataframe(train[1;10,],spatial_grid)
@@ -151,7 +155,7 @@ good_dataframe<-function(df,grid){
 #'
 #' @return A whole dataframe containing errors or the final data
 #' @export
-#'
+#' @import purrr
 #' @examples
 #' discretisation_dataframe(good_dataframe(train[1;10,],spatial_grid))
 discretisation_dataframe <- function(good_df) {
@@ -189,7 +193,9 @@ transform_row <- function(data_row) {
 #'              (coordinates, day, hour, passengers)
 #' @return The estimated price of the trip
 #' @export
-#'
+#' @import geosphere
+#' @import dplyr
+#' @import purrr
 #' @examples
 #' predict(TODO)
 predict <- function(travel) {
@@ -233,7 +239,8 @@ predict <- function(travel) {
 
     return(final_price)#, missing_data/niteration)) }
   }}
-predict_raw_data <- compose(predict, transform_row)
+
+#predict_raw_data <- compose(predict, transform_row)
 
 
 
