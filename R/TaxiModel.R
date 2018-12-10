@@ -183,14 +183,15 @@ transform_row <- function(data_row) {
 
 
 
-#' Title
+#' Prediction of taxi prices
 #'
-#' @param travel
-#'
-#' @return
+#' @param travel List (TODO vector?) which contains the informaton about a trip we want to make
+#'              (coordinates, day, hour, passengers)
+#' @return The estimated price of the trip
 #' @export
 #'
 #' @examples
+#' predict(TODO)
 predict <- function(travel) {
   #Data :
   coordA <- c(travel[[1]],travel[[2]])
