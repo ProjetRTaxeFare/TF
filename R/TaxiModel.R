@@ -145,27 +145,29 @@ good_dataframe<-function(df,grid){
 
 }
 
-#' Title
+#' Whole dataframe error or final data
 #'
 #' @param good_df
 #'
-#' @return
+#' @return A whole dataframe containing errors or the final data
 #' @export
 #'
 #' @examples
+#' discretisation_dataframe(good_dataframe(train[1;10,],spatial_grid))
 discretisation_dataframe <- function(good_df) {
   return(map_df(1:nrow(good_df), ~ safely(path(good_df[.x,])[[1]])))
 }
 
 
-#' Title
+#' Data row to vector
 #'
-#' @param data_row
+#' @param data_row a row from a data frame
 #'
-#' @return
+#' @return a vector containing the pickup and dropoff coordinates, week day, hour and passengers
 #' @export
 #'
 #' @examples
+#' TODO check this header
 transform_row <- function(data_row) {
   xA <- as.numeric(data_row[[4]])
   yA <- as.numeric(data_row[[5]])
