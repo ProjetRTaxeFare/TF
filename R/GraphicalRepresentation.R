@@ -1,6 +1,3 @@
-
-
-
 library(dplyr)
 library(tidyr)
 library(purrr)
@@ -23,20 +20,23 @@ largeur_cellule <- 500
 train <- read.csv("train-000.csv", sep = ",")
 test <- read.csv("data/test.csv", sep = ",")
 url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
-#head(train)
 
 
-
-#' Clean dataframe
+#' Elimination of location that are not in New york and its suburbs
 #'
 #' @param train object of class dataset
 #'
-#' @return The dataframe which respects our specifications
+#' @return A new dataframe with locations of interest as observation
 #' @export
+#' @import dplyr
 #'
 #' @examples
+#' cleaning(train[1:5,])
 cleaning <- function(train) {
-  train_df <- train %>% filter(fare_amount >=0) %>% filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20, pickup_latitude < 60, dropoff_longitude > -100, dropoff_longitude < -50, dropoff_latitude > 20, dropoff_latitude < 60)
+  train_df <- train %>% filter(fare_amount >=0) %>%
+    filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20,
+           pickup_latitude < 60, dropoff_longitude > -100, dropoff_longitude < -50,
+           dropoff_latitude > 20, dropoff_latitude < 60)
   return(train_df)
 }
 
