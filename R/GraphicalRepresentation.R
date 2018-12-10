@@ -1,18 +1,3 @@
-library(dplyr)
-library(tidyr)
-library(purrr)
-library(ggplot2)
-library(rgdal)
-library(sp)
-library(readr)
-library(maptools)
-library("rgdal")
-library("lattice")
-library(geosphere)
-library(DataExplorer)
-library(Hmisc)
-
-
 train <- read.csv("train-000.csv", sep = ",")
 test <- read.csv("data/test.csv", sep = ",")
 url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
@@ -27,9 +12,9 @@ url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/ny
 #' @importFrom dplyr filter
 #'
 #' @examples
+#' data(train)
 #' train <- cleaning(train[1:5,])
 cleaning <- function(train) {
-  train <- read.csv("train-000.csv", sep = ",")
   train_df <- train %>% filter(fare_amount >=0) %>%
     filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20,
            pickup_latitude < 60, dropoff_longitude > -100, dropoff_longitude < -50,
@@ -40,9 +25,9 @@ cleaning <- function(train) {
 
 #' Title
 #'
-#' @param url
+#' @param url Information online about NYC
 #'
-#' @return
+#' @return the shapefile
 #' @export
 #' @import maptools
 #' @importFrom utils
@@ -70,7 +55,7 @@ proj_shp <- function (url) {
 #' @param shp
 #' @param train the clean version from the cleaning function
 #'
-#' @return
+#' @return Useful result to plot our data on the good grid
 #' @export
 #'
 #' @examples
@@ -94,10 +79,10 @@ proj_cord <- function (shp, train) {
 ### SpatialGrid object
 #' Title
 #'
-#' @param shapefile
-#' @param largeur_cellule
+#' @param shapefile Geographical object for NYC
+#' @param largeur_cellule Parameter to know how precise we cut our travel in our cells
 #'
-#' @return
+#' @return Final spatial grid used in our functions to create the data set model
 #' @export
 #'
 #' @examples
@@ -119,7 +104,7 @@ grid <- function (shp,largeur_cellule = 500) {
 #'
 #' @param
 #'
-#' @return
+#' @return The spatial grid from scratch to save it in our data folder to be used in the model side
 #' @export
 #' @import
 #'
