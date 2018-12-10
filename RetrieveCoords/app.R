@@ -8,8 +8,11 @@ ui <- fluidPage(navbarPage("Itinerary", position = c("static-top"),tabPanel("MAP
                                                                             textInput(inputId = "origin", label = "Departure point"),
                                                                             textInput(inputId = "destination", label = "Destination point"),
                                                                             actionButton(inputId = "getRoute", label = "Get Route")
-))
-
+)),
+mainPanel( 
+  textOutput("ex1_text"),
+  textOutput("ex2_text")
+)
 )
 
 
@@ -21,10 +24,9 @@ server <- function(input, output, session) {
   output$mapNY <- renderGoogle_map({
     google_map(key = map_key, 
                search_box = TRUE, 
-               location = c(40.7127753,-74.0059728),
                scale_control = TRUE, 
-               height = 1000,
-               zoom=12) %>%
+               location=c(40.7127753,-74.0059728),
+               height = 1000) %>%
       add_traffic()
   })
   
@@ -57,7 +59,7 @@ server <- function(input, output, session) {
       clear_traffic() %>%
       clear_polylines() %>%
       clear_markers() %>%
-      add_traffic() %>%
+      # add_traffic() %>%
       add_polylines(data = df_route,
                     polyline = "route",
                     stroke_colour = "#FF33D6",
@@ -69,8 +71,22 @@ server <- function(input, output, session) {
                   info_window = "end_address",
                   label = "order")
   })
-  
- 
+  output$ex1_text <- renderText({
+    x <- input$origin
+    coordset <- geocode_url(x, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
+                            clean=TRUE, add_date='today', verbose=TRUE)
+    
+    paste("La latitude de votre point de depart est ",coordset[ , 1], "et la longitude est ",coordset[ , 2])
+    
+  })
+  output$ex2_text <- renderText({
+    x <- input$destination
+    coordset <- geocode_url(x, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
+                            clean=TRUE, add_date='today', verbose=TRUE)
+    
+    paste("La latitude de votre point d'arrivee est ",coordset[ , 1], "et la longitude est ",coordset[ , 2])
+    
+  })
 }
 
 
