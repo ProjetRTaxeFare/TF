@@ -4,7 +4,7 @@
 #'
 #' @return A new dataframe with locations of interest as observation
 #' @export
-#' @importFrom dplyr filter
+#' @import dplyr
 #'
 cleaning <- function(train) {
   train_df <- train %>% filter(fare_amount >=0) %>%
