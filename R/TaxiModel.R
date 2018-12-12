@@ -91,6 +91,7 @@ hour_filter <- function(heure){
 path <- function(pretty_row) {
 
   precision <- 2
+  largeur_cellule <- 500
 
   coordA <- c(pretty_row[[1]],pretty_row[[2]])
   coordB <- c(pretty_row[[3]],pretty_row[[4]])
@@ -117,8 +118,8 @@ path <- function(pretty_row) {
   final_df <- etapes_df %>% mutate("Prix" = prix_parcours/niteration, "Passagers" = passagers, "Jour" = jour, "Heure" = heure) %>% mutate("Creneau_Horaire" = hour_filter(heure))
 
   final_df <- final_df %>%
-    group_by(IDs, Passagers, Jour, Creneau_Horaire) %>%
-    summarise(precision = n(), Prix = sum(Prix)) %>%
+    group_by(final_df$IDs, final_df$Passagers, final_df$Jour, final_df$Creneau_Horaire) %>%
+    summarise(precision = n(), Prix = sum(final_df$Prix)) %>%
     ungroup()
   return(final_df)
 }
@@ -143,7 +144,7 @@ good_dataframe<-function(df,grid){
 
 #' Whole dataframe error or final data
 #'
-#' @param good_df
+#' @param good_df a dataframe which went through transformation
 #'
 #' @return A whole dataframe containing errors or the final data
 #' @export

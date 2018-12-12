@@ -59,7 +59,7 @@ proj_cord <- function (shp, train) {
 ### SpatialGrid object
 #' Title
 #'
-#' @param shapefile Geographical object for NYC
+#' @param shp Geographical object for NYC
 #' @param largeur_cellule Parameter to know how precise we cut our travel in our cells
 #'
 #' @return Final spatial grid used in our functions to create the data set model

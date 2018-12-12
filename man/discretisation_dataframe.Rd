@@ -7,7 +7,7 @@
 discretisation_dataframe(good_df)
 }
 \arguments{
-\item{good_df}{}
+\item{good_df}{a dataframe which went through transformation}
 }
 \value{
 A whole dataframe containing errors or the final data
