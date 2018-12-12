@@ -149,7 +149,7 @@ good_dataframe<-function(df,grid){
 #' @export
 #' @import purrr
 discretisation_dataframe <- function(good_df) {
-  return(map_df(1:nrow(good_df), ~ safely(path(good_df[.x,])[[1]])))
+  return(map_df(1:nrow(good_df), ~ safely(path)(good_df[.x,])[[1]]))
 }
 
 
@@ -202,7 +202,7 @@ predict <- function(travel) {
   #on calcule le pas vectoriel et le nb d'itération :
   distance <- distm(coordA,coordB)
   if (distance == 0) {
-    return(c(0.,1.))
+    return(0)
   } else {
     niteration = as.integer(distance / (largeur_cellule/(ajout_precision*precision)))
     pas = 1/niteration
