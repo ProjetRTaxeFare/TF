@@ -19,8 +19,13 @@ delete la branche utilisée jusque là, en commencer une nouvelle pour une nouve
 
 
 TODO :
-faire une fonction “représentation” du code au début pour pas que ça soit dans l’environnement & pour le shinyapp
+- faire une fonction “représentation” du code au début pour pas que ça soit dans l’environnement & pour le shinyapp
 shinyapp final : carte avec point de départ, point d’arrivée, qui donnera trajet & prix
+- Préparer la façon de demander les adresses de départ et de fin dans le shiny App (Rentrer une adresse puis chercher les coordonnées avec internet ? / Demander à cliquer sur une carte intéractive ? etc.)
+- Corriger l'extraction des infos "Date" et "Heure" dans la fonction transformation - Avec un format 1-7 et 0-23.
+- Commencer à réfléchir au format Package... 
+- 
+
 
 lien ggdoc :
 https://docs.google.com/document/d/14RltK-wbFdifR26zlMLGvVDLclMY0hED3MrDy5UcKxg/edit
