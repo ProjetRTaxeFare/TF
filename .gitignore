@@ -1,1 +1,8 @@
+<<<<<<< HEAD
 .gitignore
+=======
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+>>>>>>> 238d38c9b21a93430a9e1d7c0a9d184a07f18f3d
