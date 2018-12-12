@@ -7,9 +7,9 @@
 grid(shp, largeur_cellule = 500)
 }
 \arguments{
-\item{largeur_cellule}{Parameter to know how precise we cut our travel in our cells}
+\item{shp}{Geographical object for NYC}
 
-\item{shapefile}{Geographical object for NYC}
+\item{largeur_cellule}{Parameter to know how precise we cut our travel in our cells}
 }
 \value{
 Final spatial grid used in our functions to create the data set model

@@ -38,3 +38,6 @@ usethis::use_data(train_transfo2, overwrite = TRUE)
 
 train_sample <- train[1:10,]
 usethis::use_data(train_sample)
+
+usethis::use_mit_license("Gautier Dulac")
+
