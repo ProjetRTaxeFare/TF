@@ -31,5 +31,9 @@ file <- system.file("data_model/final_model_result_with_200000_data.csv", packag
 model_df <- read.csv(file, sep = ",")
 usethis::use_data(model_df, overwrite = TRUE)
 
+file <- system.file("data_model/train_transfo2.csv", package = "TFpackage")
+model_df <- read.csv(file, sep = ",")
+usethis::use_data(model_df, overwrite = TRUE)
+
 train_sample <- train[1:10,]
 usethis::use_data(train_sample)
