@@ -93,7 +93,7 @@ points(proj$cord2.coords.x1, proj$cord2.coords.x2, pch=19, col="red")
 We now want to create the grid that will be used to compute price density per square and that will be used to predict taxi fares. The function grid is used and return a spatial grid data frame, using the projection of the shapefile. Here, squares of 200 meters has been created associated with more than 55,000 square IDs.
 
 ```{r}
-largeur_cellule <- 200
+largeur_cellule <- 500
 
 spatial_grid <- grid(shp,largeur_cellule)
 ```
@@ -222,7 +222,8 @@ In order to get the final price predicition, we are using the final dataframe th
 
 ```{r}
 data(train_sample)
-predict(train_sample)
+predict(transform_row(train_sample[3,]))
+
 ```
 
 
