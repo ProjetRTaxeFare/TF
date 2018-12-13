@@ -100,6 +100,7 @@ main <- function(){
 #' @export
 #'
 over_2 <- function (long, lat, grid) {
+ shp <- proj_shp("https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip")
  cord.dec = SpatialPoints(cbind(long, lat), proj4string = CRS("+proj=longlat"))
  cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
  cord <- data.frame(cord.UTM@coords, id="A", stringsAsFactors=F)
