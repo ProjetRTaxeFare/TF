@@ -219,7 +219,7 @@ predict <- function(travel) {
     calcul_df <- etapes_df %>% mutate("Passagers" = passagers, "Jour" = jour, "Creneau_Horaire" = creneau)
 
     calcul_df <- calcul_df %>%
-      group_by(IDs, Passagers, Jour, Creneau_Horaire) %>%
+      group_by(calcul_df$IDs, calcul_df$Passagers, calcul_df$Jour, calcul_df$Creneau_Horaire) %>%
       summarise(nb = n()) %>%
       ungroup() %>% left_join(model_df, by = c("IDs", "Jour", "Creneau_Horaire", "Passagers"))
 
