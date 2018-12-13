@@ -49,11 +49,7 @@ library(TFpackage)
 ```{r}
 data(train)
 data(train_transfo2)
-<<<<<<< HEAD
 
-
-=======
->>>>>>> 0c0d64437d53c7fbad680c3d2d36ee94005c367a
 summary(train)
 ```
 
