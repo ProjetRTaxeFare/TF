@@ -20,9 +20,10 @@ sidebarLayout(
   mainPanel(
     tags$style(type="text/css",
                ".shiny-output-error { visibility: hidden; }",
-               ".shiny-output-error:before { visibility: hidden; }"),
-    textOutput("ex1_text"),
-    textOutput("ex2_text")
+               ".shiny-output-error:before { visibility: hidden; }")
+    # ,
+    # textOutput("ex1_text"),
+    # textOutput("ex2_text")
 
   )
 ))
@@ -55,8 +56,8 @@ server <- function(input, output, session) {
 
     print("getting route")
 
-    o <- input$origin
-    d <- input$destination
+    o <- isolate(input$origin)
+    d <- isolate(input$destination)
 
     res <- google_directions(key = api_key,
                              origin = o,
@@ -136,25 +137,28 @@ server <- function(input, output, session) {
     coordset2 <- geocode_url(dest, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
                              clean=TRUE, add_date='today', verbose=TRUE)
 
-    day <- case_when(weekdays(Sys.Date())=="lundi"~1,
-                     weekdays(Sys.Date())=="mardi"~2,
-                     weekdays(Sys.Date())=="mercredi"~3,
+    if (weekdays(as.Date("2018-12-11"))=="Tuesday"){
+    day <- case_when(weekdays(Sys.Date())=="Monday"~1,
+                     weekdays(Sys.Date())=="Tuesday"~2,
+                     weekdays(Sys.Date())=="Wednesday"~3,
                      weekdays(Sys.Date())=="Thursday"~4,
-                     weekdays(Sys.Date())=="vendredi"~5,
-                     weekdays(Sys.Date())=="samedi"~6,
-                     weekdays(Sys.Date())=="dimanche"~7)
-                     # weekdays(Sys.Date())=="Monday"~1,
-                     # weekdays(Sys.Date())=="Tuesday"~2,
-                     # weekdays(Sys.Date())=="Wednesday"~3,
-                     # weekdays(Sys.Date())=="Thursday"~4,
-                     # weekdays(Sys.Date())=="Friday"~5,
-                     # weekdays(Sys.Date())=="Saturday"~6,
-                     # weekdays(Sys.Date())=="Sunday"~7)
+                     weekdays(Sys.Date())=="Friday"~5,
+                     weekdays(Sys.Date())=="Saturday"~6,
+                     weekdays(Sys.Date())=="Sunday"~7)}
+    else{
+      day <- case_when(weekdays(Sys.Date())=="lundi"~1,
+                       weekdays(Sys.Date())=="mardi"~2,
+                       weekdays(Sys.Date())=="mercredi"~3,
+                       weekdays(Sys.Date())=="jeudi"~4,
+                       weekdays(Sys.Date())=="vendredi"~5,
+                       weekdays(Sys.Date())=="samedi"~6,
+                       weekdays(Sys.Date())=="dimanche"~7)
+    }
 
     hour <- lubridate::hour(strftime (Sys.time()))
     price <- predict(c(coordset[ , 2],coordset[ , 1],coordset2[ , 2],coordset2[ , 1],day,hour,passengers))
+    if (price<3.5){price = 3.50}
     paste("Price between " , round(price,2)-1,"$ and ", round(price,2)+1, "$")
-  #if((price -1)>0){return(price-1)}else{return(0)}
   })
 }
 
