@@ -2,15 +2,20 @@ library(shiny)
 library(googleway)
 library(ggmap)
 library(placement)
+library(lubridate)
 
 ui <- fluidPage(navbarPage("Itinerary", position = c("static-top"),tabPanel("MAP",
                                                                             google_mapOutput(outputId = "mapNY"),
                                                                             textInput(inputId = "origin", label = "Departure point"),
                                                                             textInput(inputId = "destination", label = "Destination point"),
+                                                                            sliderInput("slider1", "Number of passengers:",
+                                                                                        min = 0, max = 6, value = 1, animate = TRUE, step = 1
+                                                                            ),
                                                                             actionButton(inputId = "getRoute", label = "Get Route")
 )),
 sidebarLayout(
-  sidebarPanel(textOutput("ex3_text"),width = 12),
+  sidebarPanel(textOutput("ex3_text"),textOutput("ex4_text"),width = 12),
+  
 mainPanel(
   tags$style(type="text/css",
              ".shiny-output-error { visibility: hidden; }",
@@ -92,7 +97,7 @@ server <- function(input, output, session) {
     coordset <- geocode_url(x, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
                             clean=TRUE, add_date='today', verbose=TRUE)
 
-    paste("La latitude de votre point de depart est ",coordset[ , 1], "et la longitude est ",coordset[ , 2])
+    paste("Latitude of departure is ",coordset[ , 1], "and longitude is ",coordset[ , 2])
 
   })
   output$ex2_text <- renderText({
@@ -100,7 +105,7 @@ server <- function(input, output, session) {
     coordset <- geocode_url(x, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
                             clean=TRUE, add_date='today', verbose=TRUE)
 
-    paste("La latitude de votre point d'arrivee est ",coordset[ , 1], "et la longitude est ",coordset[ , 2])
+    paste("Latitude of arrival is ",coordset[ , 1], "and longitude is ",coordset[ , 2])
 
   })
   output$ex3_text <- renderText({
@@ -113,7 +118,24 @@ server <- function(input, output, session) {
                                units = "imperial")
 
 
-    paste("Le temps pour arriver a votre destination est " ,results$rows[[1]][[1]][[2]][[1]])
+    paste("Time to destination is " ,results$rows[[1]][[1]][[2]][[1]])
+  })
+  output$ex4_text <- renderText({
+    orig <- input$origin
+    dest <- input$destination
+    passengers<- input$slider1
+    day <- case_when(weekdays(Sys.Date())=="lundi"~1,
+                     weekdays(Sys.Date())=="mardi"~2,
+                     weekdays(Sys.Date())=="mercredi"~3,
+                     weekdays(Sys.Date())=="jeudi"~4,
+                     weekdays(Sys.Date())=="vendredi"~5,
+                     weekdays(Sys.Date())=="samedi"~6,
+                     weekdays(Sys.Date())=="dimanche"~7)
+       
+    hour <- lubridate::hour(strftime (Sys.time()))
+    price <- predict(c(orig[1],orig[2],dest[1],dest[2],day,hour,passengers))
+    paste("Price between " , if((price -1)>0){return(price-1)}else{return(0)}," and ", price+1)
+    
   })
 }
 
