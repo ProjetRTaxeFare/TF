@@ -7,7 +7,7 @@
 predict(travel)
 }
 \arguments{
-\item{travel}{List (TODO vector?) which contains the informaton about a trip we want to make
+\item{travel}{Vector obtained from transform_row which contains the informaton about a trip we want to make
 (coordinates, day, hour, passengers)}
 }
 \value{

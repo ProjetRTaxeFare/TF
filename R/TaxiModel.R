@@ -178,7 +178,7 @@ transform_row <- function(data_row) {
 
 #' Prediction of taxi prices
 #'
-#' @param travel List (TODO vector?) which contains the informaton about a trip we want to make
+#' @param travel Vector obtained from transform_row which contains the informaton about a trip we want to make
 #'              (coordinates, day, hour, passengers)
 #' @return The estimated price of the trip
 #' @export
@@ -186,6 +186,7 @@ transform_row <- function(data_row) {
 #' @import dplyr
 #' @import purrr
 predict <- function(travel) {
+  largeur_cellule <- 500
   precision <- 10
   ajout_precision <- 5
   data(model_df)
