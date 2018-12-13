@@ -48,8 +48,11 @@ library(TFpackage)
 ```{r}
 data(train)
 data(train_transfo2)
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 0c0d64437d53c7fbad680c3d2d36ee94005c367a
 summary(train)
 ```
 
@@ -131,6 +134,20 @@ The transformation function is used to transform an observation from the origina
 transformation(train[1,], spatial_grid)
 ```
 
+To calculate the fare, we use the following formula :
+
+$ \begin{equation}
+  \left\{
+      \begin{aligned}
+        x = x_{a} + t*(x_{b}-x_{a})\\
+        y = y_{a} + t*(y_{b}-y_{a})\\
+        t  \in \left[0,1\right] \\
+      \end{aligned}
+    \right.
+\end{equation}$
+
+We choose t and go through the line. We count the number of times we meet a new square. We give each square met the value of the fare divided by the number of square, with the corresponding value of the weekday, the hour and the number of passengers.
+
 The good_dataframe function is used to transform the complete dataframe with the map_df function.
 
 ```{r}
@@ -201,7 +218,7 @@ ggplot(data = train_transfo2) +
   
 ```
 
-From this plot, we can see that the higher price is during the night. This is due to the speical fare amount that is applied at night. Otherwise, we can see that the price is higher during peak hours.
+From this plot, we can see that the higher price is during the night. This is due to the speical fare amount that is applied at night. Otherwise, we can see that the price is higher during peak hours.We thus decided to divide the day in four period : peak hours and non-peak hours.We also do a distinction, based on the weekday.
 
 ## Compute the final dataframe
 
