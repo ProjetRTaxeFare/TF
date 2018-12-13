@@ -7,10 +7,10 @@
 #' @import dplyr
 #'
 cleaning <- function(train) {
- train_df <- train %>% filter(fare_amount >=0) %>%
-   filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20,
-          pickup_latitude < 60, dropoff_longitude > -100, dropoff_longitude < -50,
-          dropoff_latitude > 20, dropoff_latitude < 60)
+ train_df <- train %>% filter(train$fare_amount >=0) %>%
+   filter(train$pickup_longitude > -100, train$pickup_longitude < -50, train$pickup_latitude > 20,
+          train$pickup_latitude < 60, train$dropoff_longitude > -100, train$dropoff_longitude < -50,
+          train$dropoff_latitude > 20, train$dropoff_latitude < 60)
  return(train_df)
 }
 
