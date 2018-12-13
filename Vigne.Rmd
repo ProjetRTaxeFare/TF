@@ -49,7 +49,7 @@ library(TFpackage)
 data(train)
 data(train_transfo2)
 
-train_transfo2 <- train_transfo2[,-c(1,2)]
+
 summary(train)
 ```
 
@@ -69,7 +69,7 @@ summary(train)
 
 ## proj_shp function
 
-The proj_shp function is used to load, read and plot a shapefile from an url that allows to download a specific shapafile.
+The proj_shp function is used to load, read and plot a shapefile from an url that allows to download a specific shapefile.
 ```{r}
 url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
 
@@ -84,7 +84,7 @@ The proj_cord function is used to project the pickup longitude and latitude usin
 proj <- proj_cord(shp,train)
 cord <- (proj_cord(shp,train))$cord
 
-plot(shp)
+plot(shp, main="Pickup Location of the Taxi Fares")
 points(proj$cord2.coords.x1, proj$cord2.coords.x2, pch=19, col="red")
 ```
 
@@ -121,7 +121,7 @@ summary(over(cord, spatial_grid))
 
 ```
 
-The over_2 function is pretty much doing the same but takes different arguments as over. Over2 takes the longitude and latitude of a point and a spatial grid dqta frame and return the square ID for each point. This function will be used inside other function such as transformation or path.
+The over_2 function is pretty much doing the same but takes different arguments as over. Over2 takes the longitude and latitude of a point and a spatial grid data frame and returns the square ID for each point. This function will be used inside other function such as transformation or path.
 
 ## transformation and good_dataframe functions
 
@@ -156,7 +156,7 @@ describe(train_transfo2)
 
 
 ```{r}
-plot(density(train_transfo2$price))
+plot(density(train_transfo2$price), main="Density of the Price variable")
 ```
 
 From the density plot, we can see that the price is positively skewed. The majority of the values are concentrated between 0 and 20$.
@@ -164,7 +164,7 @@ From the density plot, we can see that the price is positively skewed. The major
 This is illustrated in an other way by generating the following boxplot:
 
 ```{r}
-boxplot(train_transfo2$price)
+boxplot(train_transfo2$price, main = "Boxplot of the Price Variable")
 ```
 
 ```{r}
@@ -173,18 +173,19 @@ plot_correlation(train_transfo2)
 The correlation matrix shows an (obvious) relationship between the longitude and latitude of the dropoff and pickup locations and a correlation between these variables with a price variable. This suggests that the main price driver is the distance of the fare.
 
 
-This is reinforces by the following graph:
+This is reinforced by the following graph:
 ```{r}
 
 train_2 <-train_transfo2
 
 train_2['abs_lat_diff'] <- abs(train_2['lat1'] - train_2['lat2'])
 train_2['abs_lon_diff'] <- abs(train_2['long1'] - train_2['long2'])
-train_2['cut'] <- cut2(train_2$price,seq(0,50, by=5))
+price_range <- cut2(train_2$price,seq(0,50, by=5))
 ggplot(train_2, aes(abs_lat_diff, abs_lon_diff)) +
-  geom_point(aes(colour = factor(train_2$cut)))+
+  geom_point(aes(colour = factor(price_range)))+
   xlim(0,1) +
-  ylim(0,1)
+  ylim(0,1)+
+  ggtitle("Taxi fare amount depending on latitude and longitude differences")
 
 
 ```
@@ -192,12 +193,11 @@ ggplot(train_2, aes(abs_lat_diff, abs_lon_diff)) +
 Price ranges of 5$ have been created. We can see that the more distance we are covering (higher absolute values of longitude and latitude differences), the higher the cost.
 
 
-
-
 ```{r}
 ggplot(data = train_transfo2) +
   aes(x = hour, y=price) +
-      geom_line(stat = "smooth", method = "auto")
+      geom_line(stat = "smooth", method = "auto") +
+      ggtitle("Prices depending on the time slot")
   
 ```
 
@@ -209,7 +209,7 @@ The function path has been created to realize the vectorial steps: cut each fare
 
 Furthermore, the function discretisation_dataframe is used to apply the path function to the entire dataframe. At this point, we have the final dataframe that we are using the compute the prediction.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 precision <- 2
 discretisation_dataframe(train_transfo2[1:6,])
 
@@ -220,17 +220,15 @@ From the first 6 fares, we can see that we obtain a dataframe grouped by the squ
 
 # Prediction
 
-In order to get the final price predicition, we are using the final dataframe that has already been compiled in the package, the dataframe 'model_df'. The predict function takes as an argument a taxi fare in the same format as the original training data, apply the vectorial step, and using the model_df dataframe, use the average price of the square IDs and return a predicted price.
+In order to get the final price predicition, we are using the final dataframe that has already been compiled in the package, the dataframe 'model_df'. The predict function takes as an argument a taxi fare in the same format as the original training data, applies the vectorial step, and using the model_df dataframe, uses the average price of the square IDs and returns a predicted price.
 
 
 ```{r message=FALSE, warning=FALSE}
 data(train_sample)
 predict(transform_row(train_sample[4,]))
-
-
 ```
 
 
 # Shiny App
 
-
+The Shiny App is a user friendly app that allows a user to enter the desired pickup and dropoff locations and displays the itinerary, taking into account the traffic, the time to reach the destination and the predicted price of the taxi fare.
