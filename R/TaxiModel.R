@@ -89,9 +89,9 @@ hour_filter <- function(heure){
 #' @import dplyr
 #'
 path <- function(pretty_row) {
-
+  main()
   precision <- 2
-  largeur_cellule <- 500
+
 
   coordA <- c(pretty_row[[1]],pretty_row[[2]])
   coordB <- c(pretty_row[[3]],pretty_row[[4]])
@@ -186,7 +186,7 @@ transform_row <- function(data_row) {
 #' @import dplyr
 #' @import purrr
 predict <- function(travel) {
-  largeur_cellule <- 500
+  main()
   precision <- 10
   ajout_precision <- 5
   data(model_df)

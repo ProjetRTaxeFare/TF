@@ -31,7 +31,7 @@ sidebarLayout(
 
 server <- function(input, output, session) {
 
-  main()
+
 
   map_key <- "AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs"
   api_key <- "AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs"
