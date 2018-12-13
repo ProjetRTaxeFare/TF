@@ -1,0 +1,233 @@
+ ---
+
+title: "Vignette Title"
+author: "Vignette Author"
+date: '`r Sys.Date()`'
+output: rmarkdown::html_vignette
+thumbnail: >
+  %\VignetteIndexEntry{Vignette
+Title}
+  %
+ThumbnailEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+# New York City Taxi Fare Prediction
+
+This document is written to explain and show the reader how to solve the problem that the package is solving. The package is designed to predict accurately taxi fares in New York from a dataset from the Kaggle competition New York City Taxi Fare Prediction from September 2018.
+
+The approach taken to predict taxi fares has been the following: New York City has been cut into a grid and each trip has been considered as small vectorial steps. The goal being to obtain price densities for each square from the grid and ultimately predict new taxi fares. 
+Within this document, we will describe step by step the different functions, the way to obtain the final dataframe and how to use the predict function.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Libraries required for this package
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(ggplot2)
+library(rgdal)
+library(sp)
+library(maptools)
+library("rgdal")
+library("lattice")
+library(geosphere)
+library(DataExplorer)
+library(Hmisc)
+library(TFpackage)
+```
+
+## Load the data used in the package
+
+```{r}
+data(train)
+data(train_transfo2)
+
+train_transfo2 <- train_transfo2[,-c(1,2)]
+summary(train)
+```
+
+We are dealing with the a dataframe with 8 variables from which 6 are quantitative: the fare amount, the pickup and dropoff longitude and latitude and the passenger count. The two other variables are categorical, the key and the pickup datetime, and represent the exact time at which a fare started.
+
+
+## cleaning function
+
+The cleaning function is used to remove the pickup and dropoff coordinates that are not making sense.
+```{r}
+summary(train)
+
+train <- cleaning(train)
+
+summary(train)
+```
+
+## proj_shp function
+
+The proj_shp function is used to load, read and plot a shapefile from an url that allows to download a specific shapafile.
+```{r}
+url <- "https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip"
+
+shp <- proj_shp(url)
+```
+
+## proj_cord function
+
+The proj_cord function is used to project the pickup longitude and latitude using the same projection as the shapefile. This is useful to visualize these pickup points on the map created with the shapefile. 
+
+```{r}
+proj <- proj_cord(shp,train)
+cord <- (proj_cord(shp,train))$cord
+
+plot(shp)
+points(proj$cord2.coords.x1, proj$cord2.coords.x2, pch=19, col="red")
+```
+
+## grid function
+
+We now want to create the grid that will be used to compute price density per square and that will be used to predict taxi fares. The function grid is used and return a spatial grid data frame, using the projection of the shapefile. Here, squares of 200 meters has been created associated with more than 55,000 square IDs.
+
+```{r}
+largeur_cellule <- 500
+
+spatial_grid <- grid(shp,largeur_cellule)
+```
+
+We can visualize the grid that has been created with the following:
+
+```{r}
+spplot(spatial_grid, "id",
+       panel = function(...) {
+         panel.gridplot(..., border="black")
+         sp.polygons(shp)
+       })
+
+```
+
+## over and over_2 function
+
+The over function is used to compute the spatial overlay for points and grids. The over function takes as argument coordinates in the format of spatial points data frame and a spatial grid data frame and returns the square ID of a point. 
+
+```{r}
+head(over(cord, spatial_grid))
+summary(over(cord, spatial_grid))
+
+```
+
+The over_2 function is pretty much doing the same but takes different arguments as over. Over2 takes the longitude and latitude of a point and a spatial grid dqta frame and return the square ID for each point. This function will be used inside other function such as transformation or path.
+
+## transformation and good_dataframe functions
+
+The transformation function is used to transform an observation from the original data frame into a new format with the following variables: the fare price, the passenger count, the grid IDs of the pickup and dropoff points, the longitude and latitude for the pickup and dropoff locations, the date is decomposed to extract the day and the hour of a fare.
+
+```{r}
+transformation(train[1,], spatial_grid)
+```
+
+The good_dataframe function is used to transform the complete dataframe with the map_df function.
+
+```{r}
+#train <- good_dataframe(train,spatial_grid)
+```
+
+Because computing good_dataframe is complex, we are going to use for the purpose of this document the dataframe 'train_transfo2' which is the output of the previous chunk.
+
+```{r}
+head(train_transfo2)
+```
+
+
+# Data Exploration
+
+At this point, the map and the grid have been generated, and the dataframe has been cleaned and transformed. We are now ready to implement the model to obtain the final dataframe that will be used to predict fare prices. However, we will at first conduct data exploration to understand more in depth the data that we are dealing with. 
+
+First, we generate the summary of train using the describe function:
+
+```{r}
+describe(train_transfo2)
+```
+
+
+```{r}
+plot(density(train_transfo2$price))
+```
+
+From the density plot, we can see that the price is positively skewed. The majority of the values are concentrated between 0 and 20$.
+
+This is illustrated in an other way by generating the following boxplot:
+
+```{r}
+boxplot(train_transfo2$price)
+```
+
+```{r}
+plot_correlation(train_transfo2)
+```
+The correlation matrix shows an (obvious) relationship between the longitude and latitude of the dropoff and pickup locations and a correlation between these variables with a price variable. This suggests that the main price driver is the distance of the fare.
+
+
+This is reinforces by the following graph:
+```{r}
+
+train_2 <-train_transfo2
+
+train_2['abs_lat_diff'] <- abs(train_2['lat1'] - train_2['lat2'])
+train_2['abs_lon_diff'] <- abs(train_2['long1'] - train_2['long2'])
+train_2['cut'] <- cut2(train_2$price,seq(0,50, by=5))
+ggplot(train_2, aes(abs_lat_diff, abs_lon_diff)) +
+  geom_point(aes(colour = factor(train_2$cut)))+
+  xlim(0,1) +
+  ylim(0,1)
+
+
+```
+
+Price ranges of 5$ have been created. We can see that the more distance we are covering (higher absolute values of longitude and latitude differences), the higher the cost.
+
+
+
+
+```{r}
+ggplot(data = train_transfo2) +
+  aes(x = hour, y=price) +
+      geom_line(stat = "smooth", method = "auto")
+  
+```
+
+From this plot, we can see that the higher price is during the night. This is due to the speical fare amount that is applied at night. Otherwise, we can see that the price is higher during peak hours.
+
+## Compute the final dataframe
+
+The function path has been created to realize the vectorial steps: cut each fare into small step of equal size in order to compute aggregate price density for each square ID. 
+
+Furthermore, the function discretisation_dataframe is used to apply the path function to the entire dataframe. At this point, we have the final dataframe that we are using the compute the prediction.
+
+```{r}
+precision <- 2
+discretisation_dataframe(train_transfo2[1:6,])
+
+```
+
+From the first 6 fares, we can see that we obtain a dataframe grouped by the square IDs that have been crossed by the first 6 fares, the passenger count, the day, the time slot and the number of fare that regroup these characteristics and their average prices.
+
+
+# Prediction
+
+In order to get the final price predicition, we are using the final dataframe that has already been compiled in the package, the dataframe 'model_df'. The predict function takes as an argument a taxi fare in the same format as the original training data, apply the vectorial step, and using the model_df dataframe, use the average price of the square IDs and return a predicted price.
+
+```{r message=FALSE, warning=FALSE}
+data(train_sample)
+predict(transform_row(train_sample[4,]))
+
+```
+
+
+# Shiny App
+
+
+
