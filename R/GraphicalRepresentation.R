@@ -84,8 +84,8 @@ grid <- function (shp,largeur_cellule = 500) {
 #' @export
 #'
 main <- function(){
- largeur_cellule <- 500
- shp <- proj_shp("https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip")
+ largeur_cellule <<- 500
+ shp <<- proj_shp("https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip")
  spatial_grid <- grid(shp,largeur_cellule)
  return(spatial_grid)
 }

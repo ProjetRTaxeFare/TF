@@ -3,6 +3,7 @@ library(googleway)
 library(ggmap)
 library(placement)
 library(lubridate)
+library(dplyr)
 
 ui <- fluidPage(navbarPage("Itinerary", position = c("static-top"),tabPanel("MAP",
                                                                             google_mapOutput(outputId = "mapNY"),
@@ -15,19 +16,21 @@ ui <- fluidPage(navbarPage("Itinerary", position = c("static-top"),tabPanel("MAP
 )),
 sidebarLayout(
   sidebarPanel(textOutput("ex3_text"),textOutput("ex4_text"),width = 12),
-  
-mainPanel(
-  tags$style(type="text/css",
-             ".shiny-output-error { visibility: hidden; }",
-             ".shiny-output-error:before { visibility: hidden; }"),
-  textOutput("ex1_text"),
-  textOutput("ex2_text")
 
-)
+  mainPanel(
+    tags$style(type="text/css",
+               ".shiny-output-error { visibility: hidden; }",
+               ".shiny-output-error:before { visibility: hidden; }"),
+    textOutput("ex1_text"),
+    textOutput("ex2_text")
+
+  )
 ))
 
 
 server <- function(input, output, session) {
+
+  main()
 
   map_key <- "AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs"
   api_key <- "AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs"
@@ -121,21 +124,37 @@ server <- function(input, output, session) {
     paste("Time to destination is " ,results$rows[[1]][[1]][[2]][[1]])
   })
   output$ex4_text <- renderText({
+
+
     orig <- input$origin
     dest <- input$destination
     passengers<- input$slider1
+
+    coordset <- geocode_url(orig, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
+                            clean=TRUE, add_date='today', verbose=TRUE)
+
+    coordset2 <- geocode_url(dest, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
+                             clean=TRUE, add_date='today', verbose=TRUE)
+
     day <- case_when(weekdays(Sys.Date())=="lundi"~1,
                      weekdays(Sys.Date())=="mardi"~2,
                      weekdays(Sys.Date())=="mercredi"~3,
-                     weekdays(Sys.Date())=="jeudi"~4,
+                     weekdays(Sys.Date())=="Thursday"~4,
                      weekdays(Sys.Date())=="vendredi"~5,
                      weekdays(Sys.Date())=="samedi"~6,
                      weekdays(Sys.Date())=="dimanche"~7)
-       
+                     # weekdays(Sys.Date())=="Monday"~1,
+                     # weekdays(Sys.Date())=="Tuesday"~2,
+                     # weekdays(Sys.Date())=="Wednesday"~3,
+                     # weekdays(Sys.Date())=="Thursday"~4,
+                     # weekdays(Sys.Date())=="Friday"~5,
+                     # weekdays(Sys.Date())=="Saturday"~6,
+                     # weekdays(Sys.Date())=="Sunday"~7)
+
     hour <- lubridate::hour(strftime (Sys.time()))
-    price <- predict(c(orig[1],orig[2],dest[1],dest[2],day,hour,passengers))
-    paste("Price between " , if((price -1)>0){return(price-1)}else{return(0)}," and ", price+1)
-    
+    price <- predict(c(coordset[ , 2],coordset[ , 1],coordset2[ , 2],coordset2[ , 1],day,hour,passengers))
+    paste("Price between " , round(price,2)-1,"$ and ", round(price,2)+1, "$")
+  #if((price -1)>0){return(price-1)}else{return(0)}
   })
 }
 
