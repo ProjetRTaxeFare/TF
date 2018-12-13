@@ -114,7 +114,9 @@ spplot(spatial_grid, "id",
 The over function is used to compute the spatial overlay for points and grids. The over function takes as argument coordinates in the format of spatial points data frame and a spatial grid data frame and returns the square ID of a point. 
 
 ```{r}
+
 head(over(cord, spatial_grid))
+
 summary(over(cord, spatial_grid))
 
 ```
@@ -220,14 +222,15 @@ From the first 6 fares, we can see that we obtain a dataframe grouped by the squ
 
 In order to get the final price predicition, we are using the final dataframe that has already been compiled in the package, the dataframe 'model_df'. The predict function takes as an argument a taxi fare in the same format as the original training data, apply the vectorial step, and using the model_df dataframe, use the average price of the square IDs and return a predicted price.
 
+
 ```{r message=FALSE, warning=FALSE}
 data(train_sample)
 predict(transform_row(train_sample[4,]))
+
 
 ```
 
 
 # Shiny App
-
 
 

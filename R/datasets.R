@@ -17,3 +17,8 @@
 #'
 #' @format dataframe with the result of our calculated model to be used in predict
 "model_df"
+
+#' dataset
+#'
+#' @format dataframe with the result of our calculated model to be used in predict
+"train_transfo2"

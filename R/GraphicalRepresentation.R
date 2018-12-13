@@ -7,10 +7,10 @@
 #' @import dplyr
 #'
 cleaning <- function(train) {
- train_df <- train %>% filter(fare_amount >=0) %>%
-   filter(pickup_longitude > -100, pickup_longitude < -50, pickup_latitude > 20,
-          pickup_latitude < 60, dropoff_longitude > -100, dropoff_longitude < -50,
-          dropoff_latitude > 20, dropoff_latitude < 60)
+ train_df <- train %>% filter(train$fare_amount >=0) %>%
+   filter(train$pickup_longitude > -100, train$pickup_longitude < -50, train$pickup_latitude > 20,
+          train$pickup_latitude < 60, train$dropoff_longitude > -100, train$dropoff_longitude < -50,
+          train$dropoff_latitude > 20, train$dropoff_latitude < 60)
  return(train_df)
 }
 
@@ -59,7 +59,7 @@ proj_cord <- function (shp, train) {
 ### SpatialGrid object
 #' Title
 #'
-#' @param shapefile Geographical object for NYC
+#' @param shp Geographical object for NYC
 #' @param largeur_cellule Parameter to know how precise we cut our travel in our cells
 #'
 #' @return Final spatial grid used in our functions to create the data set model
@@ -100,6 +100,7 @@ main <- function(){
 #' @export
 #'
 over_2 <- function (long, lat, grid) {
+ shp <- proj_shp("https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip")
  cord.dec = SpatialPoints(cbind(long, lat), proj4string = CRS("+proj=longlat"))
  cord.UTM <- spTransform(cord.dec, CRS(proj4string(shp)))
  cord <- data.frame(cord.UTM@coords, id="A", stringsAsFactors=F)

@@ -91,6 +91,7 @@ hour_filter <- function(heure){
 path <- function(pretty_row) {
 
   precision <- 2
+  largeur_cellule <- 500
 
   coordA <- c(pretty_row[[1]],pretty_row[[2]])
   coordB <- c(pretty_row[[3]],pretty_row[[4]])
@@ -117,8 +118,8 @@ path <- function(pretty_row) {
   final_df <- etapes_df %>% mutate("Prix" = prix_parcours/niteration, "Passagers" = passagers, "Jour" = jour, "Heure" = heure) %>% mutate("Creneau_Horaire" = hour_filter(heure))
 
   final_df <- final_df %>%
-    group_by(IDs, Passagers, Jour, Creneau_Horaire) %>%
-    summarise(precision = n(), Prix = sum(Prix)) %>%
+    group_by(final_df$IDs, final_df$Passagers, final_df$Jour, final_df$Creneau_Horaire) %>%
+    summarise(precision = n(), Prix = sum(final_df$Prix)) %>%
     ungroup()
   return(final_df)
 }
@@ -143,13 +144,13 @@ good_dataframe<-function(df,grid){
 
 #' Whole dataframe error or final data
 #'
-#' @param good_df
+#' @param good_df a dataframe which went through transformation
 #'
 #' @return A whole dataframe containing errors or the final data
 #' @export
 #' @import purrr
 discretisation_dataframe <- function(good_df) {
-  return(map_df(1:nrow(good_df), ~ safely(path(good_df[.x,])[[1]])))
+  return(map_df(1:nrow(good_df), ~ safely(path)(good_df[.x,])[[1]]))
 }
 
 
@@ -177,7 +178,7 @@ transform_row <- function(data_row) {
 
 #' Prediction of taxi prices
 #'
-#' @param travel List (TODO vector?) which contains the informaton about a trip we want to make
+#' @param travel Vector obtained from transform_row which contains the informaton about a trip we want to make
 #'              (coordinates, day, hour, passengers)
 #' @return The estimated price of the trip
 #' @export
@@ -185,6 +186,7 @@ transform_row <- function(data_row) {
 #' @import dplyr
 #' @import purrr
 predict <- function(travel) {
+  largeur_cellule <- 500
   precision <- 10
   ajout_precision <- 5
   data(model_df)
@@ -202,7 +204,7 @@ predict <- function(travel) {
   #on calcule le pas vectoriel et le nb d'itération :
   distance <- distm(coordA,coordB)
   if (distance == 0) {
-    return(c(0.,1.))
+    return(0)
   } else {
     niteration = as.integer(distance / (largeur_cellule/(ajout_precision*precision)))
     pas = 1/niteration
@@ -218,7 +220,7 @@ predict <- function(travel) {
     calcul_df <- etapes_df %>% mutate("Passagers" = passagers, "Jour" = jour, "Creneau_Horaire" = creneau)
 
     calcul_df <- calcul_df %>%
-      group_by(IDs, Passagers, Jour, Creneau_Horaire) %>%
+      group_by(calcul_df$IDs, calcul_df$Passagers, calcul_df$Jour, calcul_df$Creneau_Horaire) %>%
       summarise(nb = n()) %>%
       ungroup() %>% left_join(model_df, by = c("IDs", "Jour", "Creneau_Horaire", "Passagers"))
 
