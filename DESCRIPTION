@@ -24,7 +24,8 @@ Imports:
     knitr,
     tidyr,
     Hmisc,
-    shiny
+    shiny,
+    googleway
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Depends: R (>= 2.10)
