@@ -189,7 +189,7 @@ predict <- function(travel) {
   main()
   precision <- 10
   ajout_precision <- 5
-  data(model_df)
+  data("model_df", envir = environment())
   #Data :
   coordA <- c(travel[[1]],travel[[2]])
   coordB <- c(travel[[3]],travel[[4]])
