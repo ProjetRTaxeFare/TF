@@ -22,3 +22,8 @@
 #'
 #' @format dataframe with the result of our calculated model to be used in predict
 "train_transfo2"
+
+#' shapefile
+#'
+#' @format map of the grid
+"shp"
