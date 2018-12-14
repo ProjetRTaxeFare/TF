@@ -1,4 +1,21 @@
-
+#' Run the Shiny app
+#' 
+#' @import shiny
+#' @import placement
+#' @import lubridate
+#' @import dplyr
+#' @import ggmap
+#' @import googleway
+#' 
+#' @export
+ShinyApp <- function() {
+  appDir <- system.file("ShinyApp", package = "TFpackage")
+  if (appDir == "") {
+    stop("Could not find example directory. Try re-installing `TFpackage`.", call. = FALSE)
+  }
+  
+  shiny::runApp(appDir, display.mode = "normal")
+}
 
 #' Keep the relevant variables
 #'
@@ -231,15 +248,7 @@ predict <- function(travel) {
     return(final_price)#, missing_data/niteration)) }
   }}
 
-#' #' @export
-ShinyApp <- function() {
-  appDir <- system.file("App", package = "TFpackage")
-  if (appDir == "") {
-    stop("Could not find example directory. Try re-installing `TFpackage`.", call. = FALSE)
-  }
-  
-  shiny::runApp(appDir, display.mode = "normal")
-}
+
 
 #predict_raw_data <- compose(predict, transform_row)
 
