@@ -1,8 +1,15 @@
 #' Run the Shiny app
 #' 
+#' @import shiny
+#' @import placement
+#' @import lubridate
+#' @import dplyr
+#' @import ggmap
+#' @import googleway
+#' 
 #' @export
 ShinyApp <- function() {
-  appDir <- system.file("ShinyApp", package = "TFpackage")
+  appDir <- system.file("App", package = "TFpackage")
   if (appDir == "") {
     stop("Could not find example directory. Try re-installing `TFpackage`.", call. = FALSE)
   }
