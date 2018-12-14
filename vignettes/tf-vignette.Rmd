@@ -5,8 +5,9 @@ date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
+ 
 ---
 
 ```{r setup, include = FALSE}
@@ -246,4 +247,5 @@ predict(transform_row(train_sample[4,]))
 # Shiny App
 
 The Shiny App is a user friendly app that allows a user to enter the desired pickup and dropoff locations and displays the itinerary, taking into account the traffic, the time to reach the destination and the predicted price of the taxi fare.
+The price is given with an error, in order to be sure to cover the real price.
 
