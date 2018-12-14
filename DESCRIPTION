@@ -29,7 +29,6 @@ Imports:
     lattice,
     googleway,
     placement,
-    ggmap,
     lubridate
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr

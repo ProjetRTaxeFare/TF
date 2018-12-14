@@ -2,10 +2,10 @@
 % Please edit documentation in R/TaxiModel.R
 \name{ShinyApp}
 \alias{ShinyApp}
-\title{Run the Shiny app}
+\title{#' @export}
 \usage{
 ShinyApp()
 }
 \description{
-Run the Shiny app
+#' @export
 }

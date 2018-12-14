@@ -1,19 +1,43 @@
-#' @import shiny
-#' @import googleway
-#' @import ggmap
-#' @import placement
-#' @import lubridate
-#' @import dplyr
-#' 
-app_server <- function(input, output,session) {
-  
-  
-  
+library(shiny)
+library(googleway)
+library(ggmap)
+library(placement)
+library(lubridate)
+library(dplyr)
+
+ui <- fluidPage(navbarPage("Itinerary", position = c("static-top"),tabPanel("MAP",
+                                                                            google_mapOutput(outputId = "mapNY"),
+                                                                            textInput(inputId = "origin", label = "Departure point"),
+                                                                            textInput(inputId = "destination", label = "Destination point"),
+                                                                            sliderInput("slider1", "Number of passengers:",
+                                                                                        min = 0, max = 6, value = 1, animate = TRUE, step = 1
+                                                                            ),
+                                                                            actionButton(inputId = "getRoute", label = "Get Route")
+)),
+sidebarLayout(
+  sidebarPanel(textOutput("ex3_text"),textOutput("ex4_text"),width = 12),
+
+  mainPanel(
+    tags$style(type="text/css",
+               ".shiny-output-error { visibility: hidden; }",
+               ".shiny-output-error:before { visibility: hidden; }")
+    # ,
+    # textOutput("ex1_text"),
+    # textOutput("ex2_text")
+
+  )
+))
+
+
+server <- function(input, output, session) {
+
+
+
   map_key <- "AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs"
   api_key <- "AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs"
-  
-  
-  
+
+
+
   output$mapNY <- renderGoogle_map({
     google_map(key = map_key,
                search_box = TRUE,
@@ -23,34 +47,34 @@ app_server <- function(input, output,session) {
                zoom=12) %>%
       add_traffic()
   })
-  
-  
-  
-  
-  
+
+
+
+
+
   observeEvent(input$getRoute,{
-    
+
     print("getting route")
-    
+
     o <- isolate(input$origin)
     d <- isolate(input$destination)
-    
+
     res <- google_directions(key = api_key,
                              origin = o,
                              destination = d,
                              optimise_waypoints = TRUE,
                              mode = "driving")
-    
+
     df_route <- data.frame(route = res$routes$overview_polyline$points)
-    
+
     df_way <-
       data.frame(end_address = res$routes$legs[[1]]$end_address,start_address = res$routes$legs[[1]]$start_address,
                  start_location_lon=res$routes$legs[[1]]$start_location$lng, start_location_lat=res$routes$legs[[1]]$start_location$lat,
                  end_location_lon=res$routes$legs[[1]]$end_location$lng, end_location_lat=res$routes$legs[[1]]$end_location$lat)
-    
-    
+
+
     df_way$order <- as.character(1:nrow(df_way))
-    
+
     google_map_update(map_id = "mapNY") %>%
       clear_traffic() %>%
       clear_polylines() %>%
@@ -76,17 +100,17 @@ app_server <- function(input, output,session) {
     x <- input$origin
     coordset <- geocode_url(x, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
                             clean=TRUE, add_date='today', verbose=TRUE)
-    
+
     paste("Latitude of departure is ",coordset[ , 1], "and longitude is ",coordset[ , 2])
-    
+
   })
   output$ex2_text <- renderText({
     x <- input$destination
     coordset <- geocode_url(x, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
                             clean=TRUE, add_date='today', verbose=TRUE)
-    
+
     paste("Latitude of arrival is ",coordset[ , 1], "and longitude is ",coordset[ , 2])
-    
+
   })
   output$ex3_text <- renderText({
     orig <- input$origin
@@ -96,31 +120,31 @@ app_server <- function(input, output,session) {
                                mode = "driving",
                                key = api_key,
                                units = "imperial")
-    
-    
+
+
     paste("Time to destination is " ,results$rows[[1]][[1]][[2]][[1]])
   })
   output$ex4_text <- renderText({
-    
-    
+
+
     orig <- input$origin
     dest <- input$destination
     passengers<- input$slider1
-    
+
     coordset <- geocode_url(orig, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
                             clean=TRUE, add_date='today', verbose=TRUE)
-    
+
     coordset2 <- geocode_url(dest, auth="standard_api", privkey="AIzaSyDbsN9eAJDG8lD773Omi2UBASPPVAUiiXs ",
                              clean=TRUE, add_date='today', verbose=TRUE)
-    
+
     if (weekdays(as.Date("2018-12-11"))=="Tuesday"){
-      day <- case_when(weekdays(Sys.Date())=="Monday"~1,
-                       weekdays(Sys.Date())=="Tuesday"~2,
-                       weekdays(Sys.Date())=="Wednesday"~3,
-                       weekdays(Sys.Date())=="Thursday"~4,
-                       weekdays(Sys.Date())=="Friday"~5,
-                       weekdays(Sys.Date())=="Saturday"~6,
-                       weekdays(Sys.Date())=="Sunday"~7)}
+    day <- case_when(weekdays(Sys.Date())=="Monday"~1,
+                     weekdays(Sys.Date())=="Tuesday"~2,
+                     weekdays(Sys.Date())=="Wednesday"~3,
+                     weekdays(Sys.Date())=="Thursday"~4,
+                     weekdays(Sys.Date())=="Friday"~5,
+                     weekdays(Sys.Date())=="Saturday"~6,
+                     weekdays(Sys.Date())=="Sunday"~7)}
     else{
       day <- case_when(weekdays(Sys.Date())=="lundi"~1,
                        weekdays(Sys.Date())=="mardi"~2,
@@ -130,7 +154,7 @@ app_server <- function(input, output,session) {
                        weekdays(Sys.Date())=="samedi"~6,
                        weekdays(Sys.Date())=="dimanche"~7)
     }
-    
+
     hour <- lubridate::hour(strftime (Sys.time()))
     price <- predict(c(coordset[ , 2],coordset[ , 1],coordset2[ , 2],coordset2[ , 1],day,hour,passengers))
     if (price<3.5){price = 3.50}
@@ -140,3 +164,6 @@ app_server <- function(input, output,session) {
 
 
 
+
+
+shinyApp(ui, server)
