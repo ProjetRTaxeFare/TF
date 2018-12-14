@@ -15,6 +15,10 @@ usethis::use_package("Hmisc")
 usethis::use_package("shiny")
 usethis::use_package("ggplot2")
 usethis::use_package("lattice")
+usethis::use_package("googleway")
+usethis::use_package("placement")
+usethis::use_package("lubridate")
+
 
 #remotes::install_github("ThinkR-open/attachment")
 #attachment::att_to_description(dir.v = "")
@@ -48,3 +52,5 @@ usethis::use_data(train_sample)
 usethis::use_mit_license("Gautier Dulac")
 
 devtools::use_testthat()
+
+devtools::install(build_vignettes = TRUE)
