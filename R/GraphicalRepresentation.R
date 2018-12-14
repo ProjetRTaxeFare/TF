@@ -34,7 +34,7 @@ proj_shp <- function (url) {
  shp <- rgdal::readOGR("../inst/nybb_13a", "nybb")
  }
  else {
-   files <- unzip(tmp, exdir="/TF/inst")
+   files <- unzip(tmp, exdir="/inst")
    shp <- rgdal::readOGR("/TF/inst/nybb_13a", "nybb")
  }
  return(shp)
