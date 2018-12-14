@@ -30,9 +30,8 @@ Imports:
     googleway,
     placement,
     lubridate,
-    ggmap
+    ggmap,
+    testthat
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Depends: R (>= 2.10)
-Suggests: 
-    testthat

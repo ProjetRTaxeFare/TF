@@ -3,12 +3,12 @@
 \docType{data}
 \name{shp}
 \alias{shp}
-\title{shapefile}
+\title{dataset}
 \format{map of the grid}
 \usage{
 shp
 }
 \description{
-shapefile
+dataset
 }
 \keyword{datasets}
