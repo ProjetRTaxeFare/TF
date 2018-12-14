@@ -9,6 +9,7 @@ usethis::use_package("rgdal")
 usethis::use_package("sp")
 usethis::use_package("purrr")
 usethis::use_package("geosphere")
+usethis::use_package("knitr")
 
 #remotes::install_github("ThinkR-open/attachment")
 #attachment::att_to_description(dir.v = "")
