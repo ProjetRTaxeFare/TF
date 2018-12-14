@@ -186,7 +186,9 @@ transform_row <- function(data_row) {
 #' @import dplyr
 #' @import purrr
 predict <- function(travel) {
-  main()
+  spatialgrid <- main()
+  data("shp", envir = environment())
+  largeur_cellule <- 500
   precision <- 10
   ajout_precision <- 5
   data("model_df", envir = environment())
@@ -237,7 +239,7 @@ ShinyApp <- function() {
   if (appDir == "") {
     stop("Could not find example directory. Try re-installing `TFpackage`.", call. = FALSE)
   }
-  
+
   shiny::runApp(appDir, display.mode = "normal")
 }
 

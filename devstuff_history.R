@@ -29,8 +29,9 @@ devtools::load_all()
 spatial_grid <- main()
 usethis::use_data(spatial_grid, overwrite = TRUE)
 
-#data("iris")
-#TFpackage::iris
+shp < proj_shp("https://www1.nyc.gov/assets/planning/download/zip/data-maps/open-data/nybb_13a.zip")
+usethis::use_data(shp, overwrite = TRUE)
+
 
 file <- system.file("data_clean/train-000.csv", package = "TFpackage")
 train <- read.csv(file, sep = ",")
