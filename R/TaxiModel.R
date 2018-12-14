@@ -131,7 +131,7 @@ path <- function(pretty_row) {
 #' @param df The dataframe containing all the initial information
 #' @param grid The spatial grid we chose to work with
 #'
-#' @return creates a whole dataframe with clean data
+#' @return creates a whole dataframe with clean data (we apply transformation on all the lines)
 #' @export
 #' @import purrr
 #'
