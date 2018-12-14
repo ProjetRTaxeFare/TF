@@ -25,6 +25,8 @@ Imports:
     tidyr,
     Hmisc,
     shiny,
+    ggplot2,
+    lattice,
     googleway,
     placement,
     lubridate
