@@ -28,7 +28,7 @@ proj_shp <- function (url) {
  shpurl <- url
  tmp <- tempfile(fileext=".zip")
  download.file(shpurl, destfile=tmp)
- files <- unzip(tmp, exdir="TF/inst")
+ files <- unzip(tmp, exdir="/TF/inst")
  shp <- rgdal::readOGR("nybb_13a", "nybb")
  return(shp)
 }
