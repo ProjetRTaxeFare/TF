@@ -19,6 +19,8 @@ usethis::use_package("googleway")
 usethis::use_package("placement")
 usethis::use_package("lubridate")
 usethis::use_package("ggmap")
+usethis::use_package("magrittr")
+usethis::use_package("testthat")
 
 #remotes::install_github("ThinkR-open/attachment")
 #attachment::att_to_description(dir.v = "")
