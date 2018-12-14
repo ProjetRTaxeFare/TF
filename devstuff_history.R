@@ -14,6 +14,8 @@ usethis::use_package("tidyr")
 usethis::use_package("Hmisc")
 usethis::use_package("shiny")
 usethis::use_package("googleway")
+usethis::use_package("placement")
+usethis::use_package("lubridate")
 
 
 #remotes::install_github("ThinkR-open/attachment")
