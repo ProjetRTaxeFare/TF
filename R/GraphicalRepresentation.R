@@ -28,8 +28,15 @@ proj_shp <- function (url) {
  shpurl <- url
  tmp <- tempfile(fileext=".zip")
  download.file(shpurl, destfile=tmp)
- files <- unzip(tmp, exdir="TF/inst")
- shp <- rgdal::readOGR("nybb_13a", "nybb")
+ wd <- getwd()
+ if (substr(wd, nchar(wd)-9, nchar(wd)) == "/vignettes") {
+ files <- unzip(tmp, exdir="../inst")
+ shp <- rgdal::readOGR("../inst/nybb_13a", "nybb")
+ }
+ else {
+   files <- unzip(tmp, exdir="/TF/inst")
+   shp <- rgdal::readOGR("/TF/inst/nybb_13a", "nybb")
+ }
  return(shp)
 }
 
