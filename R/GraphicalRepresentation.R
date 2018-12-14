@@ -15,7 +15,7 @@ cleaning <- function(train) {
 }
 
 
-#' Title
+#' Create a shapefile
 #'
 #' @param url Information online about NYC
 #'
@@ -28,13 +28,13 @@ proj_shp <- function (url) {
  shpurl <- url
  tmp <- tempfile(fileext=".zip")
  download.file(shpurl, destfile=tmp)
- files <- unzip(tmp, exdir=getwd())
+ files <- unzip(tmp, exdir="TF/inst")
  shp <- rgdal::readOGR("nybb_13a", "nybb")
  return(shp)
 }
 
 
-#' Title
+#' Create a plot
 #'
 #' @param shp shapefile
 #' @param train the clean version from the cleaning function
