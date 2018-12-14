@@ -2,7 +2,7 @@
 % Please edit documentation in R/GraphicalRepresentation.R
 \name{proj_shp}
 \alias{proj_shp}
-\title{Title}
+\title{Create a shapefile}
 \usage{
 proj_shp(url)
 }
@@ -13,5 +13,5 @@ proj_shp(url)
 the shapefile
 }
 \description{
-Title
+Create a shapefile
 }

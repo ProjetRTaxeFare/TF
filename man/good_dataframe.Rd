@@ -12,7 +12,7 @@ good_dataframe(df, grid)
 \item{grid}{The spatial grid we chose to work with}
 }
 \value{
-creates a whole dataframe with clean data
+creates a whole dataframe with clean data (we apply transformation on all the lines)
 }
 \description{
 Whole dataframe with clean data

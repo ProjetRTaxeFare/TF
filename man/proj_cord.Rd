@@ -2,7 +2,7 @@
 % Please edit documentation in R/GraphicalRepresentation.R
 \name{proj_cord}
 \alias{proj_cord}
-\title{Title}
+\title{Create a plot}
 \usage{
 proj_cord(shp, train)
 }
@@ -15,5 +15,5 @@ proj_cord(shp, train)
 Useful result to plot our data on the good grid
 }
 \description{
-Title
+Create a plot
 }

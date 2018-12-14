@@ -41,3 +41,4 @@ usethis::use_data(train_sample)
 
 usethis::use_mit_license("Gautier Dulac")
 
+devtools::use_testthat()
