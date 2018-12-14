@@ -18,9 +18,12 @@ Imports:
     utils,
     rgdal,
     sp,
-    magrittr, 
+    magrittr,
     purrr,
-    geosphere
+    geosphere,
+    knitr,
+    tidyr,
+    Hmisc
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Depends: R (>= 2.10)
