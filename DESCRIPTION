@@ -18,15 +18,19 @@ Imports:
     utils,
     rgdal,
     sp,
-    magrittr, 
+    magrittr,
     purrr,
     geosphere,
+    knitr,
+    tidyr,
+    Hmisc,
     shiny,
+    ggplot2,
+    lattice,
     googleway,
-    lubridate,
-    dplyr,
+    placement,
     ggmap,
-    googleway
+    lubridate
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Depends: R (>= 2.10)
