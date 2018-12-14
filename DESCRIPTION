@@ -23,7 +23,10 @@ Imports:
     geosphere,
     knitr,
     tidyr,
-    Hmisc
+    Hmisc,
+    shiny,
+    ggplot2,
+    lattice
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Depends: R (>= 2.10)
