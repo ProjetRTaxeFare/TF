@@ -20,7 +20,13 @@ Imports:
     sp,
     magrittr, 
     purrr,
-    geosphere
+    geosphere,
+    shiny,
+    googleway,
+    lubridate,
+    dplyr,
+    ggmap,
+    googleway
 RoxygenNote: 6.1.1
 VignetteBuilder: knitr
 Depends: R (>= 2.10)

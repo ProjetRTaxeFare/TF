@@ -9,7 +9,7 @@
 #' 
 #' @export
 ShinyApp <- function() {
-  appDir <- system.file("App", package = "TFpackage")
+  appDir <- system.file("ShinyApp", package = "TFpackage")
   if (appDir == "") {
     stop("Could not find example directory. Try re-installing `TFpackage`.", call. = FALSE)
   }
