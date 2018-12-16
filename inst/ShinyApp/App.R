@@ -138,21 +138,21 @@ server <- function(input, output, session) {
                              clean=TRUE, add_date='today', verbose=TRUE)
 
     if (weekdays(as.Date("2018-12-11"))=="Tuesday"){
-    day <- case_when(weekdays(Sys.Date())=="Monday"~1,
-                     weekdays(Sys.Date())=="Tuesday"~2,
-                     weekdays(Sys.Date())=="Wednesday"~3,
-                     weekdays(Sys.Date())=="Thursday"~4,
-                     weekdays(Sys.Date())=="Friday"~5,
-                     weekdays(Sys.Date())=="Saturday"~6,
-                     weekdays(Sys.Date())=="Sunday"~7)}
+    day <- case_when(weekdays(Sys.Date())=="Monday"~0,
+                     weekdays(Sys.Date())=="Tuesday"~1,
+                     weekdays(Sys.Date())=="Wednesday"~2,
+                     weekdays(Sys.Date())=="Thursday"~3,
+                     weekdays(Sys.Date())=="Friday"~4,
+                     weekdays(Sys.Date())=="Saturday"~5,
+                     weekdays(Sys.Date())=="Sunday"~6)}
     else{
-      day <- case_when(weekdays(Sys.Date())=="lundi"~1,
-                       weekdays(Sys.Date())=="mardi"~2,
-                       weekdays(Sys.Date())=="mercredi"~3,
-                       weekdays(Sys.Date())=="jeudi"~4,
-                       weekdays(Sys.Date())=="vendredi"~5,
-                       weekdays(Sys.Date())=="samedi"~6,
-                       weekdays(Sys.Date())=="dimanche"~7)
+      day <- case_when(weekdays(Sys.Date())=="lundi"~0,
+                       weekdays(Sys.Date())=="mardi"~1,
+                       weekdays(Sys.Date())=="mercredi"~2,
+                       weekdays(Sys.Date())=="jeudi"~3,
+                       weekdays(Sys.Date())=="vendredi"~4,
+                       weekdays(Sys.Date())=="samedi"~5,
+                       weekdays(Sys.Date())=="dimanche"~6)
     }
 
     hour <- lubridate::hour(strftime (Sys.time()))
